@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-
+#include <queue>
 using namespace std;
 
 struct Graf
@@ -39,7 +39,6 @@ struct Graf
     {   
         poseceni_cvorovi[cvor] = true;
         cout << "Preorder " << cvor << endl;
-
         for(int i = 0; i < matrica.size(); i++)
             if(matrica[cvor][i] && !posecen(i))
                 dfs(i);
