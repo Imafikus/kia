@@ -6,100 +6,76 @@ using namespace std;
 
 struct Graf
 {
-    vector<list<int> > lista_povezanosti;
-    vector<bool> posecen;
+    vector<list<int>> lista;
+    vector<bool> poseceni_cvorovi;
 
-    /**
-     * Ucitava graf sa n elemenata
-     * 
-     * Popunjava lista_povezanosti i posecen
-     */
-    void ucitaj_graf(int n)
+    void ucitaj_graf()
     {
+        int n;
+        cout << "Unesi broj cvorova" << endl;
+        cin >> n;
+
         init(n);
 
-        for(int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
         {
-            posecen[i] = false;
-
             int m;
-            cout << "Broj suseda cvora " << i << endl;
+            cout << "Koliko suseda ima cvor " << i << endl;
             cin >> m;
 
-            for(int j = 0; j < m; j++)
+            cout << "Unesi susede za cvor" << endl;
+            poseceni_cvorovi[i] = false;
+            for (int j = 0; j < m; j++)
             {
-                int sused;
-                cin >> sused;
-                lista_povezanosti[i].push_back(sused);
+                int e;
+                cin >> e;
+                lista[i].push_back(e);
             }
+            cout << endl;
         }
     }
 
-    void preorder_dfs(int cvor = 0)
+    void dfs(int cvor)
     {
-        cout << "Dolazna enumeracija: " << cvor << " " << endl;
-        
-        poseti(cvor);
-        
-        for(auto it = lista_povezanosti[cvor].begin(); it != lista_povezanosti[cvor].end(); it++)
-        {
-            if(nije_posecen(cvor))
-                preorder_dfs(*it);
-        }
-    }
-    
-    void postorder_dfs(int cvor)
-    {        
-        poseti(cvor);
-        
-        for(auto it = lista_povezanosti[cvor].begin(); it != lista_povezanosti[cvor].end(); it++)
-        {
-            if(nije_posecen(*it))
-                preorder_dfs(*it);
-        }
-        cout << "Odlazna enumeracija: " << cvor << " " << endl;
-    }
+        cout << "Preorder: " << cvor << endl;
 
-    /**
-     * inicijalizuje kontejnere
-     * 
-     * @param velicina na koju treba da se postave kontejneri
-     */
-    void init(int n)
+        poseceni_cvorovi[cvor] = true;
+
+        for (auto it = lista[cvor].begin(); it != lista[cvor].end(); it++)
+        {
+            if (!posecen(*it))
+                dfs(*it);
+        }
+    }
+ 
+    bool posecen(int cvor)
     {
-        
-        for(int i = 0; i < lista_povezanosti.size(); i++)
-            lista_povezanosti[i].clear();
-        
-        lista_povezanosti.clear();
-        posecen.clear();
-
-        lista_povezanosti.resize(n);
-        posecen.resize(n);
+        return poseceni_cvorovi[cvor];
     }
 
-    // oznacava da je odredjeni cvor posecen
     void poseti(int cvor)
     {
-        posecen[cvor] = true;
+        poseceni_cvorovi[cvor] = true;
     }
 
-    //proverava da li odredjeni cvor nije posecen
-    bool nije_posecen(int cvor)
+    void init(int n)
     {
-        return !posecen[cvor]; 
+        for (int i = 0; i < lista.size(); i++)
+            lista[i].clear();
+
+        lista.clear();
+        poseceni_cvorovi.clear();
+
+        lista.resize(n);
+        poseceni_cvorovi.resize(n);
     }
 };
 int main()
 {
     Graf g;
-    
-    int n;
-    cout << "Unesi broj elemenata grafa" << endl;
-    cin >> n;
 
-    g.ucitaj_graf(n);
-    g.preorder_dfs(0);
+    g.ucitaj_graf();
+    g.dfs(0);
 
     return 0;
 }
