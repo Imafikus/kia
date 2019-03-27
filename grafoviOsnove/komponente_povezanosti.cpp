@@ -66,6 +66,36 @@ public:
         }
     }
 
+    void svePutanjeIzmedjuDvaCvora(int pocetniCvor, int krajnjiCvor, vector<int> putanja)
+    {
+
+        if(pocetniCvor == krajnjiCvor)
+        {
+            putanja.push_back(krajnjiCvor);
+            stampajVektor(putanja);
+            return;
+        }
+
+        obeleziPosecenCvor(pocetniCvor);
+        putanja.push_back(pocetniCvor);
+
+        auto pocetak = listaPovezanosti[pocetniCvor].begin();
+        auto kraj = listaPovezanosti[pocetniCvor].end();
+
+        while(pocetak != kraj)
+        {
+            int sledeciCvor = *pocetak;
+            
+            if(!jestePosecen(sledeciCvor))
+                svePutanjeIzmedjuDvaCvora(sledeciCvor, krajnjiCvor, putanja);
+            
+            pocetak++;
+        }
+        poseceniCvorovi[pocetniCvor] = false;
+    }
+
+
+
     bool jestePosecen(int cvor)
     {
         return poseceniCvorovi[cvor];
@@ -102,6 +132,14 @@ private:
         brKompPovezanosti = 0;
     }
 
+    void stampajVektor(vector<int> v)
+    {
+        for(int e : v)
+            cout << e << " ";
+        cout << endl;
+        
+    }
+
 };
 
 int main()
@@ -114,8 +152,14 @@ int main()
     Graf probniGraf;
     probniGraf.ucitajCvorove(brojCvorovaGrafa);
     
-    probniGraf.odrediBrojKompPovezanosti();
 
-    cout << "Broj komponenti povezanosti je: " << probniGraf.brKompPovezanosti << endl;
+    cout << "Unesite cvorove izmedju kojih zelite da vidite putanje" << endl;
+    int pocetni, kranji;
+    cin >> pocetni >> kranji;
+
+    vector<int> putanja;
+
+    probniGraf.svePutanjeIzmedjuDvaCvora(pocetni, kranji, putanja);
+
 
 }
