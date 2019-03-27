@@ -13,6 +13,7 @@ class Graf
 
 public:
     int brKompPovezanosti;
+    int duzinaNajkracePutanje = INT_MAX;
 
     void ucitajCvorove(int brojCvorova)
     {
@@ -94,7 +95,56 @@ public:
         poseceniCvorovi[pocetniCvor] = false;
     }
 
+    void najkracaPutanjaIzmedjuDvaCvora(int pocetniCvor, int krajnjiCvor, int putDoSad)
+    {
 
+        if(pocetniCvor == krajnjiCvor)
+        {
+            if(putDoSad < duzinaNajkracePutanje)
+                duzinaNajkracePutanje = putDoSad;
+            return;
+        }
+
+        obeleziPosecenCvor(pocetniCvor);
+        putDoSad++;
+        
+        auto pocetak = listaPovezanosti[pocetniCvor].begin();
+        auto kraj = listaPovezanosti[pocetniCvor].end();
+
+        while(pocetak != kraj)
+        {
+            int sledeciCvor = *pocetak;
+            
+            if(!jestePosecen(sledeciCvor))
+                najkracaPutanjaIzmedjuDvaCvora(sledeciCvor, krajnjiCvor, putDoSad);
+            
+            pocetak++;
+        }
+        poseceniCvorovi[pocetniCvor] = false;
+    }
+
+    bool imaCikulsNeusmeren(int pocetniCvor, int roditeljPocetnogCvora)
+    {
+
+        obeleziPosecenCvor(pocetniCvor);
+        
+        auto pocetak = listaPovezanosti[pocetniCvor].begin();
+        auto kraj = listaPovezanosti[pocetniCvor].end();
+
+        while(pocetak != kraj)
+        {
+            int sledeciCvor = *pocetak;
+            
+            if(jestePosecen(sledeciCvor) && sledeciCvor != roditeljPocetnogCvora)
+                return true;
+            
+            else if(imaCikulsNeusmeren(sledeciCvor, pocetniCvor))
+                return true;
+
+            pocetak++;
+        }
+        return false;
+    }
 
     bool jestePosecen(int cvor)
     {
@@ -153,13 +203,9 @@ int main()
     probniGraf.ucitajCvorove(brojCvorovaGrafa);
     
 
-    cout << "Unesite cvorove izmedju kojih zelite da vidite putanje" << endl;
-    int pocetni, kranji;
-    cin >> pocetni >> kranji;
-
-    vector<int> putanja;
-
-    probniGraf.svePutanjeIzmedjuDvaCvora(pocetni, kranji, putanja);
-
-
+    bool imaCiklus = probniGraf.imaCikulsNeusmeren(0, -1);
+    if(imaCiklus)
+        cout << "Graf ima ciklus" << endl;
+    else
+        cout << "Graf nema ciklus" << endl;
 }
