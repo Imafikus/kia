@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 
-
 #define NEPROHODNO (-1)
 #define PROHODNO (1)
 #define IMA_KROFNU (2)
@@ -21,8 +20,6 @@ void bfs(vector<vector<int>> listaPovezanosti, int pocetniCvor, vector<int> vred
 {
 
     int brojKrofni = 0;
-    // int maxUdaljenostOdPocetka = 0;
-
     int maxUdaljenost = -1;
 
     vector<bool> poseceniCvorovi(listaPovezanosti.size());
@@ -45,10 +42,8 @@ void bfs(vector<vector<int>> listaPovezanosti, int pocetniCvor, vector<int> vred
         
         poseceniCvorovi[upravoPosecen] = true;
 
-
         if(vrednostiPolja[upravoPosecen] == IMA_KROFNU)
         {
-            // ovde
             brojKrofni++;
             
             if (udaljenost > maxUdaljenost)
@@ -63,7 +58,6 @@ void bfs(vector<vector<int>> listaPovezanosti, int pocetniCvor, vector<int> vred
                 
                 poseceniCvorovi[*sused] = true;
                 
-                // maxUdaljenostOdPocetka++;
                 udaljenosti.push(udaljenost + 1);
                 cekajuPosecivanje.push(*sused);
             }
@@ -78,7 +72,7 @@ void bfs(vector<vector<int>> listaPovezanosti, int pocetniCvor, vector<int> vred
 int main()
 {   
     int brojCvorova = 8;
-    //cin >> brojCvorova;
+    //? cin >> brojCvorova;
 
     vector<vector<int>> lista(brojCvorova);
     vector<int> vrednostiPolja(brojCvorova);
