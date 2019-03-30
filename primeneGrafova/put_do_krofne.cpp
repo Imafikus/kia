@@ -13,7 +13,6 @@ void dodajGranu(int v, int u, vector<vector<int>> &listaPovezanosti)
 {
     listaPovezanosti[v].push_back(u);
     listaPovezanosti[u].push_back(v);
-
 }
 
 void bfs(vector<vector<int>> listaPovezanosti, int pocetniCvor, vector<int> vrednostiPolja)
