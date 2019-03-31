@@ -23,6 +23,9 @@ public:
         ids.resize(brojCvorova);
         lowLink.resize(brojCvorova);
         roditelj.resize(brojCvorova, -1);
+
+        //? SLC Tarjan
+        uSteku.resize(brojCvorova, false);
     }
 
 
@@ -173,6 +176,48 @@ public:
         cout << endl;
     }
 
+    void slcTarjan(int cvor)
+    {
+        slcStack.push(cvor);
+        uSteku[cvor] = true;
+
+        ids[cvor] = id;
+        lowLink[cvor] = id;
+        id++;
+
+        jePosecen[cvor] = true;
+
+        for(int sused : listaPovezanosti[cvor])
+        {
+            if(!jePosecen[sused]) 
+                slcTarjan(sused);
+        
+            if(uSteku[sused]) 
+                lowLink[cvor] = min(lowLink[sused], lowLink[cvor]);
+            
+        }
+        
+        if(ids[cvor] == lowLink[cvor])
+        {
+            while(true)
+            {
+                int cvorKomponente = slcStack.top();
+                cout << cvorKomponente << " ";
+                
+                slcStack.pop();
+                uSteku[cvorKomponente] = false;
+
+                lowLink[cvorKomponente] = ids[cvor];
+
+                if(cvorKomponente == cvor)
+                {
+                    cout << endl;
+                    break;
+                }
+            } 
+        }
+    }
+
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -192,11 +237,15 @@ private:
     vector<int> ids;
     vector<int> lowLink;
     vector<int> roditelj;
+
+    //? komponente jake povezanosti - Tarjan
+    vector<bool> uSteku;
+    stack<int> slcStack;
 };
 
 int main()
 {
-    Graf graf(3);
+    Graf graf(9);
 
     // graf.dodajGranu(0, 1);
     // graf.dodajGranu(2, 0);
@@ -207,10 +256,18 @@ int main()
     // graf.dodajGranu(5, 2);
 
     graf.dodajGranu(0, 1);
-    graf.dodajGranu(1, 0);
-    
-    graf.dodajGranu(1, 2);
-    graf.dodajGranu(2, 1);
+    graf.dodajGranu(1, 3);
+    graf.dodajGranu(1, 4);
+    graf.dodajGranu(4, 6);
+    graf.dodajGranu(6, 1);
+    graf.dodajGranu(0, 7);
+    graf.dodajGranu(0, 2);
+    graf.dodajGranu(2, 5);
+    graf.dodajGranu(5, 8);
+    graf.dodajGranu(8, 0);
 
-    graf.nadjiArkTacke(0);
+
+    graf.slcTarjan(0);
+    
+    
 }
