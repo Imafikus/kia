@@ -141,6 +141,38 @@ public:
         }
     }
 
+    void nadjiArkTacke(int cvor)
+    {
+        jePosecen[cvor] = true;
+
+        ids[cvor] = id;
+        lowLink[cvor] = id;
+        id++;
+
+        int decaCvora = 0;
+
+        for(int sused : listaPovezanosti[cvor])
+        {
+            if(sused == roditelj[cvor]) continue;
+
+            roditelj[sused] = cvor;
+            decaCvora++;
+            if(!jePosecen[sused])
+                nadjiArkTacke(sused);
+            
+            lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
+
+            if(roditelj[cvor] == -1 && decaCvora > 1)
+                cout << cvor << " ";
+            
+            if(roditelj[cvor] != -1 && ids[cvor] <= lowLink[sused])
+                cout << cvor << " ";
+        else
+            lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
+        }
+        cout << endl;
+    }
+
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -180,5 +212,5 @@ int main()
     graf.dodajGranu(1, 2);
     graf.dodajGranu(2, 1);
 
-    graf.nadjiMostove(0);
+    graf.nadjiArkTacke(0);
 }
