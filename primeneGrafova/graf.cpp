@@ -18,7 +18,7 @@ public:
         jePosecen.resize(brojCvorova, false);
         ulazniStepen.resize(brojCvorova, 0);
 
-        //? mostovi i artikulacione tacke
+        //? mostovi i artikulacione tacke (ids, lowLink koristi i Tarjan)
         id = 0;
         ids.resize(brojCvorova);
         lowLink.resize(brojCvorova);
@@ -232,7 +232,7 @@ private:
     vector<int> topoloskoUredjenje;
 
 
-    //? mostovi i artikulacione tacke
+    //? mostovi i artikulacione tacke (ids i lowLink koristi i Tarjan)
     int id;
     vector<int> ids;
     vector<int> lowLink;
