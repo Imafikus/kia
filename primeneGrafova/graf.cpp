@@ -137,7 +137,7 @@ public:
                     cout << cvor << " -> " << sused << endl;
             }
             else 
-                lowLink[cvor] = min(ids[sused], lowLink[cvor]);        
+                lowLink[cvor] = min(lowLink[sused], lowLink[cvor]);        
         }
     }
 
