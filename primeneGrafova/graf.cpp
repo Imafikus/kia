@@ -12,11 +12,19 @@ class Graf
 public:
     Graf(int brojCvorova)
     {
+        //? Osnovne stvari
         this->brojCvorova = brojCvorova;
         listaPovezanosti.resize(brojCvorova);
         jePosecen.resize(brojCvorova, false);
         ulazniStepen.resize(brojCvorova, 0);
+
+        //? mostovi i artikulacione tacke
+        id = 0;
+        ids.resize(brojCvorova);
+        lowLink.resize(brojCvorova);
+        roditelj.resize(brojCvorova, -1);
     }
+
 
     void dfs(int cvor, bool dozvoljenoPisanje = true)
     {
@@ -103,6 +111,36 @@ public:
         cout << endl;
     }
 
+    void nadjiMostove(int cvor)
+    {
+        jePosecen[cvor] = true;
+
+        ids[cvor] = id;
+        lowLink[cvor] = id;
+        id++;
+
+        int decaCvora = 0;
+
+        for(int sused : listaPovezanosti[cvor])
+        {
+            if(sused == roditelj[cvor]) continue;
+
+            if(!jePosecen[sused])
+            {
+                roditelj[sused] = cvor;
+                nadjiMostove(sused);
+                decaCvora++;
+
+                lowLink[cvor] = min(lowLink[sused], lowLink[cvor]);
+
+                if(ids[cvor] < lowLink[sused])
+                    cout << cvor << " -> " << sused << endl;
+            }
+            else 
+                lowLink[cvor] = min(ids[sused], lowLink[cvor]);        
+        }
+    }
+
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -116,22 +154,31 @@ private:
     //? topSort - Kahn
     vector<int> topoloskoUredjenje;
 
+
+    //? mostovi i artikulacione tacke
+    int id;
+    vector<int> ids;
+    vector<int> lowLink;
+    vector<int> roditelj;
 };
 
 int main()
 {
-    Graf graf(6);
+    Graf graf(3);
+
+    // graf.dodajGranu(0, 1);
+    // graf.dodajGranu(2, 0);
+    // graf.dodajGranu(3, 4);
+    // graf.dodajGranu(1, 4);
+    // graf.dodajGranu(5, 4);
+    // graf.dodajGranu(2, 4);
+    // graf.dodajGranu(5, 2);
 
     graf.dodajGranu(0, 1);
-    graf.dodajGranu(3, 0);
-    graf.dodajGranu(3, 4);
-    graf.dodajGranu(1, 4);
-    graf.dodajGranu(5, 4);
-    graf.dodajGranu(2, 4);
-    graf.dodajGranu(5, 2);
+    graf.dodajGranu(1, 0);
+    
+    graf.dodajGranu(1, 2);
+    graf.dodajGranu(2, 1);
 
-    vector<int> sortirani = graf.topSort();
-    for(int cvor : sortirani)
-        cout << cvor << " ";
-    cout << endl;
+    graf.nadjiMostove(0);
 }
