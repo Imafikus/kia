@@ -3,8 +3,21 @@
 #include <algorithm>
 #include <queue>
 #include <stack>
+#include <climits>
+
+#define INF (INT_MAX)
 
 using namespace std;
+
+//? Struktura za poredenje pair<int, int>
+struct compare
+{
+    bool operator()(pair<int, int> &p1, pair<int, int> &p2)
+    {
+        return p1.second > p2.second;
+    }
+};
+
 
 class Graf
 {
@@ -19,6 +32,8 @@ public:
         ulazniStepen.resize(brojCvorova, 0);
 
         //? mostovi i artikulacione tacke (ids, lowLink koristi i Tarjan)
+        //? roditelje koristi i Dijkstra
+        
         id = 0;
         ids.resize(brojCvorova);
         lowLink.resize(brojCvorova);
@@ -26,6 +41,12 @@ public:
 
         //? SLC Tarjan
         uSteku.resize(brojCvorova, false);
+
+        //? Dijkstra
+        dijkstraLista.resize(brojCvorova);
+        udaljenost.resize(brojCvorova, INF);
+        najmanjeGranaDoCvora.resize(brojCvorova, INF);
+        postojiPutDoCvora.resize(brojCvorova, false);
     }
 
 
@@ -218,6 +239,60 @@ public:
         }
     }
 
+    void dijkstraDodajGranu(int u, int v, int tezina)
+    {
+        dijkstraLista[u].push_back(make_pair(v, tezina));
+    }
+
+    void dijkstra(int cvor, int krajnjiCvor)
+    {
+        priority_queue< pair<int, int>, vector<pair<int, int>>, compare> heap;
+        heap.push(make_pair(cvor, 0));
+        
+        udaljenost[cvor] = 0;
+        najmanjeGranaDoCvora[cvor] = 0;
+
+        pair<int, int> trenutniCvor;
+        while(!heap.empty())
+        {
+            trenutniCvor = heap.top();
+            heap.pop();
+
+            if(postojiPutDoCvora[trenutniCvor.first])
+                continue;
+            
+            postojiPutDoCvora[trenutniCvor.first] = true;
+
+            for(pair<int, int> sused : dijkstraLista[trenutniCvor.first])
+            {
+                //?Gledamo da li je sused manje udaljen ili da li je isto udaljen ali
+                //? je potreban manji broj grana da se dodje do njega
+                //? U oba slucaja hocemo da radimo update
+                
+                //? BITNO: Uvek prvo gledamo da li vazi da je udaljenost manja
+                //? jer ce to uvek da padne (lenjo poredjenje), ako nije i samo cemo svejedno da ulazimo u provere
+                //? jer nas onda briga za put sa najmanje grana, jer svejedno nije najblizi.
+                //? Tek kada znamo da je ovo najblizi put, onda hocemo da se interesujemo za grane
+
+                //? +1 kod poredjenja ide jer kacimo novu granu pa nas interesuje da li ce tad da bude vece
+                if(udaljenost[trenutniCvor.first] + sused.second < udaljenost[sused.first] &&
+                    najmanjeGranaDoCvora[sused.first] > najmanjeGranaDoCvora[trenutniCvor.first] + 1)
+                {
+                    najmanjeGranaDoCvora[sused.first] = najmanjeGranaDoCvora[trenutniCvor.first] + 1;
+                    
+                    udaljenost[sused.first] = udaljenost[trenutniCvor.first] + sused.second;
+
+                    roditelj[sused.first] = trenutniCvor.first;
+
+                    heap.push(make_pair(sused.first, udaljenost[sused.first]));
+                }
+            }
+        }
+        stampajNajkraciDijkstraPut(krajnjiCvor);
+    }
+
+    
+
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -231,8 +306,8 @@ private:
     //? topSort - Kahn
     vector<int> topoloskoUredjenje;
 
-
-    //? mostovi i artikulacione tacke (ids i lowLink koristi i Tarjan)
+    //? mostovi i artikulacione tacke (ids i lowLink koristi i Tarjan   )
+    //? roditelje koristi Dijkstra
     int id;
     vector<int> ids;
     vector<int> lowLink;
@@ -241,33 +316,49 @@ private:
     //? komponente jake povezanosti - Tarjan
     vector<bool> uSteku;
     stack<int> slcStack;
+
+    //? Dijkstra
+    vector<vector<pair<int, int> > > dijkstraLista;
+    vector<int> udaljenost;
+    vector<int> najmanjeGranaDoCvora;
+    vector<bool> postojiPutDoCvora;
+
+    void stampajNajkraciDijkstraPut(int krajnjiCvor)
+    {
+        stack<int> najkraciPut;
+        while(roditelj[krajnjiCvor] != -1)
+        {
+            najkraciPut.push(krajnjiCvor);
+            krajnjiCvor = roditelj[krajnjiCvor];
+        }
+        //? pushujemo i pocetni cvor
+        najkraciPut.push(krajnjiCvor);
+
+        while(!najkraciPut.empty())
+        {
+            int cvor = najkraciPut.top();
+            najkraciPut.pop();
+
+            //? ako je poslednji cvor koji treba da se stampa
+            //? ne zelimo da imamo '->' posle njega
+            if(najkraciPut.empty())
+                cout << cvor;
+            else
+                cout << cvor << " -> ";
+        }
+        cout << endl;
+    }
 };
 
 int main()
 {
-    Graf graf(9);
+    Graf graf(5);
 
-    // graf.dodajGranu(0, 1);
-    // graf.dodajGranu(2, 0);
-    // graf.dodajGranu(3, 4);
-    // graf.dodajGranu(1, 4);
-    // graf.dodajGranu(5, 4);
-    // graf.dodajGranu(2, 4);
-    // graf.dodajGranu(5, 2);
-
-    graf.dodajGranu(0, 1);
-    graf.dodajGranu(1, 3);
-    graf.dodajGranu(1, 4);
-    graf.dodajGranu(4, 6);
-    graf.dodajGranu(6, 1);
-    graf.dodajGranu(0, 7);
-    graf.dodajGranu(0, 2);
-    graf.dodajGranu(2, 5);
-    graf.dodajGranu(5, 8);
-    graf.dodajGranu(8, 0);
-
-
-    graf.slcTarjan(0);
+    graf.dijkstraDodajGranu(0, 1, 1);
+    graf.dijkstraDodajGranu(1, 2, 4);
+    graf.dijkstraDodajGranu(2, 3, 7);
+    graf.dijkstraDodajGranu(3, 4, 2);
+    graf.dijkstraDodajGranu(4, 0, 11);
     
-    
+    graf.dijkstra(0, 3);
 }

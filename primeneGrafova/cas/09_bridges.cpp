@@ -129,15 +129,20 @@ private:
 
 int main ()
 {
-  Graph g(5);
+  Graph g(3);
 
-  g.add_edge(0, 2);
-  g.add_edge(0, 3);
-  g.add_edge(1, 0);
-  g.add_edge(2, 1);
-  g.add_edge(3, 4);
+  // g.add_edge(0, 2);
+  // g.add_edge(0, 3);
+  // g.add_edge(1, 0);
+  // g.add_edge(2, 1);
+  // g.add_edge(3, 4);
 
+  // g.DFS(0);
+  g.add_edge(0, 1);
+  g.add_edge(1, 2);
   g.DFS(0);
+
+
 
   return 0;
 }
