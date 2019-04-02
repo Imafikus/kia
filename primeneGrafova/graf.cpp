@@ -34,7 +34,6 @@ public:
 
         //? mostovi i artikulacione tacke (ids, lowLink koristi i Tarjan)
         //? roditelje koristi i Dijkstra
-        
         id = 0;
         ids.resize(brojCvorova);
         lowLink.resize(brojCvorova);
@@ -50,14 +49,12 @@ public:
         postojiPutDoCvora.resize(brojCvorova, false);
     }
 
-
     void dfs(int cvor, bool dozvoljenoPisanje = true)
     {
         jePosecen[cvor] = true;
         if(dozvoljenoPisanje)
             cout << cvor << " ";
 
-        
         for(int sused : listaPovezanosti[cvor])
         {
             if(!jePosecen[sused])
@@ -65,6 +62,29 @@ public:
         }
 
         topSortStack.push(cvor);
+    }
+    void dfsStack(int cvor)
+    {
+        jePosecen[cvor] = true;
+        
+        stack<int> neobradjeni;
+        neobradjeni.push(cvor);
+
+        while(!neobradjeni.empty())
+        {
+            int trenutniCvor = neobradjeni.top();
+            cout << trenutniCvor;        
+            neobradjeni.pop();
+
+            for(int sused : listaPovezanosti[trenutniCvor])
+            {
+                if(!jePosecen[sused])
+                {
+                    neobradjeni.push(sused);
+                    jePosecen[sused] = true;
+                }
+            }
+        }
     }
 
     void bfs(int cvor)
@@ -144,8 +164,6 @@ public:
         lowLink[cvor] = id;
         id++;
 
-        int decaCvora = 0;
-
         for(int sused : listaPovezanosti[cvor])
         {
             if(sused == roditeljCvora[cvor]) continue;
@@ -154,7 +172,6 @@ public:
             {
                 roditeljCvora[sused] = cvor;
                 nadjiMostove(sused);
-                decaCvora++;
 
                 lowLink[cvor] = min(lowLink[sused], lowLink[cvor]);
 
@@ -182,6 +199,7 @@ public:
 
             roditeljCvora[sused] = cvor;
             decaCvora++;
+            
             if(!jePosecen[sused])
                 nadjiArkTacke(sused);
             
@@ -216,7 +234,6 @@ public:
         
             if(uSteku[sused]) 
                 lowLink[cvor] = min(lowLink[sused], lowLink[cvor]);
-            
         }
         
         if(ids[cvor] == lowLink[cvor])
@@ -380,7 +397,6 @@ private:
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
-    
         cout << "stampajNajkraciPut" << endl;
         stack<int> najkraciPut;
         while(roditeljCvora[krajnjiCvor] != -1)
@@ -411,13 +427,15 @@ private:
 
 int main()
 {
-    Graf graf(3);
+    Graf graf(5);
 
-    graf.dodajGranuSaTezinom(0, 2, 4);
-    graf.dodajGranuSaTezinom(2, 1, -6);
-    graf.dodajGranuSaTezinom(1, 0, 1);
+    graf.dodajGranu(0, 2);
+    graf.dodajGranu(0, 1);
+    graf.dodajGranu(0, 3);
+    graf.dodajGranu(3, 4);
+    graf.dodajGranu(2, 1);
 
     cout << "Prosao grane" << endl;
     
-    graf.belmanFord(0);
+    graf.dfsStack(0);
 }
