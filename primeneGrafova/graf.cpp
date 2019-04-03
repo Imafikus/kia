@@ -259,6 +259,8 @@ public:
     void dodajGranuSaTezinom(int u, int v, int tezina)
     {
         listaSaTezinama[u].push_back(make_pair(v, tezina));
+        listaSaTezinama[v].push_back(make_pair(u, tezina));
+
     }
 
     void dijkstra(int cvor, int krajnjiCvor)
@@ -296,7 +298,63 @@ public:
         }
         stampajNajkraciPut(krajnjiCvor);
     }
-    
+    void prim()
+    {
+        priority_queue<pair<int, int>, vector<pair<int, int>>, compare> heap;
+
+        //?Stavljamo prvi cvor na heap i stavljamo da je rastojanje
+        //? do njega 0
+        //? BITNO: kako svakako moramo da prodjemo kroz sve cvorove,
+        //? nebitno je koji uzmemo, tako da ne mora prvi(nulti)
+
+        udaljenost[0] = 0;
+        heap.push(make_pair(0, udaljenost[0]));
+        jePosecen[0] == true;
+
+        //? Postavljamo udaljenosti od svih ostalih cvorova na INF
+        for(int i = 1; i < brojCvorova; i++)
+            heap.push(make_pair(i, INF));
+
+        while(!heap.empty())
+        {
+            pair<int, int> najbliziCvor = heap.top();
+            heap.pop();
+
+            //?rastojanje do ovog cvora ce biti tezina grane koja spaja taj i trenutni cvor
+            udaljenost[najbliziCvor.first] = najbliziCvor.second;
+
+            if(!jePosecen[najbliziCvor.first])
+            {
+                jePosecen[najbliziCvor.first] = true;
+
+                for(pair<int, int> sused: listaSaTezinama[najbliziCvor.first])
+                {
+                    if(!jePosecen[sused.first])
+                    {
+                        //? proveravamo da li se preko trenutnog cvora moze doci brze nego pre
+                        //? tj. da li je nova grana kraca od prethodne najbolje, ako jeste
+                        //? onda update-ujemo vrednost
+                        if(sused.second < udaljenost[sused.first])
+                        {
+                            udaljenost[sused.first] = sused.second;
+                            roditeljCvora[sused.first] = najbliziCvor.first;
+                            
+                            heap.push(make_pair(sused.first, udaljenost[sused.first]));
+                        }
+                    }
+                }
+            }
+        }
+        for(int cvor = 1; cvor < brojCvorova; cvor++)
+        {
+            cout << roditeljCvora[cvor] << " " << cvor << " tezina: "<< udaljenost[cvor] << endl;
+        }
+    }
+
+void nadjiTezinu(int u, int v)
+{
+    vector<pair<int, int>> tezineU = listaSaTezinama[u];
+}
 
 private:
     //? Osnovne inicijalizacije
@@ -360,11 +418,14 @@ private:
 int main()
 {
     Graf graf(6);
-    graf.dodajGranuSaTezinom(1, 3, 1);
-    graf.dodajGranuSaTezinom(1, 2, 5);
-    graf.dodajGranuSaTezinom(2, 0, 1);
-    graf.dodajGranuSaTezinom(3, 2, 2);
-    graf.dodajGranuSaTezinom(3, 0, 4);
+    graf.dodajGranuSaTezinom(0, 1, 2);//
+    graf.dodajGranuSaTezinom(0, 2, 3);//
+    graf.dodajGranuSaTezinom(1, 2, 5);//
+    graf.dodajGranuSaTezinom(1, 4, 1);//
+    graf.dodajGranuSaTezinom(4, 3, 7);//
+    graf.dodajGranuSaTezinom(2, 3, 2);
+    graf.dodajGranuSaTezinom(2, 5, 4);
 
-    graf.dijkstra(1, 0);
+
+    graf.prim();
 }
