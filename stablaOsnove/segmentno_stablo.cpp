@@ -32,7 +32,7 @@ int main()
     int velicinaStabla = 2 * pow(2, visinaStabla);
     vector<int> segmentnoStablo(velicinaStabla);
 
-    napraviSegmentnoStablo(v, segmentnoStablo, 0, brojElemenataNiza, 1);
+    napraviSegmentnoStablo(v, segmentnoStablo, 0, brojElemenataNiza-1, 1);
 
     for(int e : segmentnoStablo)
         cout << e << " ";
