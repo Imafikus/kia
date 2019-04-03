@@ -45,7 +45,6 @@ public:
         //? Dijkstra
         listaSaTezinama.resize(brojCvorova);
         udaljenost.resize(brojCvorova, INF);
-        najmanjeGranaDoCvora.resize(brojCvorova, INF);
         postojiPutDoCvora.resize(brojCvorova, false);
     }
 
@@ -268,7 +267,6 @@ public:
         heap.push(make_pair(cvor, 0));
         
         udaljenost[cvor] = 0;
-        najmanjeGranaDoCvora[cvor] = 0;
 
         pair<int, int> trenutniCvor;
         while(!heap.empty())
@@ -283,21 +281,11 @@ public:
 
             for(pair<int, int> sused : listaSaTezinama[trenutniCvor.first])
             {
-                //?Gledamo da li je sused manje udaljen ili da li je isto udaljen ali
-                //? je potreban manji broj grana da se dodje do njega
-                //? U oba slucaja hocemo da radimo update
                 
-                //? BITNO: Uvek prvo gledamo da li vazi da je udaljenost manja
-                //? jer ce to uvek da padne (lenjo poredjenje), ako nije onda nas briga da li postoji
-                //? neki drugi put koji nije najblizi a koji ima manje grana
-                //? Tek kada znamo da je ovo najblizi put, onda hocemo da se interesujemo za grane
-
-                //? +1 kod poredjenja ide jer kacimo novu granu pa nas interesuje da li ce tad da bude vece
-                if(udaljenost[trenutniCvor.first] + sused.second < udaljenost[sused.first] &&
-                    najmanjeGranaDoCvora[sused.first] > najmanjeGranaDoCvora[trenutniCvor.first] + 1)
-                {
-                    najmanjeGranaDoCvora[sused.first] = najmanjeGranaDoCvora[trenutniCvor.first] + 1;
-                    
+                //? Gledamo da li je udaljenost od trenutnog cvora + udaljenost do suseda
+                //? bolja nego predjasnja udaljenost od suseda, ako jeste, update-ujemo informacije
+                if(udaljenost[trenutniCvor.first] + sused.second <= udaljenost[sused.first])
+                {                    
                     udaljenost[sused.first] = udaljenost[trenutniCvor.first] + sused.second;
 
                     roditeljCvora[sused.first] = trenutniCvor.first;
@@ -307,61 +295,6 @@ public:
             }
         }
         stampajNajkraciPut(krajnjiCvor);
-    }
-
-    void belmanFord(int pocetniCvor)
-    {
-        bool negativanCiklus = false;
-
-        udaljenost[pocetniCvor] = 0;
-        for(int br = 0; br < brojCvorova-1; br++)
-            
-            //? trenutniCvor prolazi kroz liste suseda za svaki cvor pojedinacno
-            for(int trenutniCvor = 0; trenutniCvor < listaSaTezinama.size(); trenutniCvor++)
-            {
-                //? j prolazi kroz svakog suseda pojedinacno iz liste suseda
-                //? nekog cvora
-                for(int j = 0; j < listaSaTezinama[trenutniCvor].size(); j++)
-                {
-                    int sused = listaSaTezinama[trenutniCvor][j].first;
-                    int grana = listaSaTezinama[trenutniCvor][j].second;
-
-
-                    if(udaljenost[trenutniCvor] + grana < udaljenost[sused])
-                    {
-                        udaljenost[sused] = udaljenost[trenutniCvor] + grana;
-                        roditeljCvora[sused] = trenutniCvor;
-                    }
-                }
-            }
-
-            //? Provere da li graf ima negativan ciklus.
-            //? Apsolutno ista procedura, samo ako nadjemo cvor koji
-            //? je moguce updateovati izlazimo
-            for(int trenutniCvor = 0; trenutniCvor < listaSaTezinama.size(); trenutniCvor++)
-            {
-                for(int j = 0; j < listaSaTezinama[trenutniCvor].size(); j++)
-                {
-                    int sused = listaSaTezinama[trenutniCvor][j].first;
-                    int grana = listaSaTezinama[trenutniCvor][j].second;
-
-                    if(udaljenost[trenutniCvor] + grana < udaljenost[sused])
-                    {
-                        cout << "Graf ima negativan ciklus" << endl;
-                        negativanCiklus = true;
-                        return;
-                    }
-                }
-            }
-            cout << "Prosla druga petlja" << endl;
-            //? Stampanje najkracih puteva
-            if(!negativanCiklus)
-            {
-                for(int cvor = 0; cvor < brojCvorova; cvor++)
-                    stampajNajkraciPut(cvor);
-                cout << endl;
-            }
-
     }
     
 
@@ -392,7 +325,6 @@ private:
     //? Dijkstra, Belman-Ford
     vector<vector<pair<int, int> > > listaSaTezinama;
     vector<int> udaljenost;
-    vector<int> najmanjeGranaDoCvora;
     vector<bool> postojiPutDoCvora;
 
     void stampajNajkraciPut(int krajnjiCvor)
@@ -427,15 +359,12 @@ private:
 
 int main()
 {
-    Graf graf(5);
+    Graf graf(6);
+    graf.dodajGranuSaTezinom(1, 3, 1);
+    graf.dodajGranuSaTezinom(1, 2, 5);
+    graf.dodajGranuSaTezinom(2, 0, 1);
+    graf.dodajGranuSaTezinom(3, 2, 2);
+    graf.dodajGranuSaTezinom(3, 0, 4);
 
-    graf.dodajGranu(0, 2);
-    graf.dodajGranu(0, 1);
-    graf.dodajGranu(0, 3);
-    graf.dodajGranu(3, 4);
-    graf.dodajGranu(2, 1);
-
-    cout << "Prosao grane" << endl;
-    
-    graf.dfsStack(0);
+    graf.dijkstra(1, 0);
 }
