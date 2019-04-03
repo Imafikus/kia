@@ -29,7 +29,7 @@ int main()
 
     int visinaStabla = ceil(log2(brojElemenataNiza));
 
-    int velicinaStabla = 2 * pow(2, visinaStabla);
+    int velicinaStabla = pow(2, visinaStabla + 1);
     vector<int> segmentnoStablo(velicinaStabla);
 
     napraviSegmentnoStablo(v, segmentnoStablo, 0, brojElemenataNiza-1, 1);
