@@ -36,6 +36,7 @@ public:
         //? roditelje koristi i Dijkstra
         id = 0;
         ids.resize(brojCvorova);
+
         lowLink.resize(brojCvorova);
         roditeljCvora.resize(brojCvorova, -1);
 
@@ -46,6 +47,14 @@ public:
         listaSaTezinama.resize(brojCvorova);
         udaljenost.resize(brojCvorova, INF);
         postojiPutDoCvora.resize(brojCvorova, false);
+    
+    
+        //? union-find
+        velicinaKomponente.resize(brojCvorova, 1);
+        kruskalIds.reserve(brojCvorova);
+        for(int i = 0; i < brojCvorova; i++)
+            kruskalIds[i] = i;
+    
     }
 
     void dfs(int cvor, bool dozvoljenoPisanje = true)
@@ -300,7 +309,7 @@ public:
     }
     void prim()
     {
-        priority_queue<pair<int, int>, vector<pair<int, int>>, compare> heap;
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>> > heap;
 
         //?Stavljamo prvi cvor na heap i stavljamo da je rastojanje
         //? do njega 0
@@ -350,11 +359,40 @@ public:
             cout << roditeljCvora[cvor] << " " << cvor << " tezina: "<< udaljenost[cvor] << endl;
         }
     }
+    void kruskal()
+    {
+        vector<pair<int, pair<int, int>> >grane;
+        for(int cvor = 0; cvor < brojCvorova; cvor++)
+        {
+            for(pair<int, int>sused : listaSaTezinama[cvor])
+            {
+                int tezinaGrane = sused.second;
+                grane.push_back( {tezinaGrane, make_pair(cvor, sused.first)} );
+            }
+        }
 
-void nadjiTezinu(int u, int v)
-{
-    vector<pair<int, int>> tezineU = listaSaTezinama[u];
-}
+        sort(grane.begin(), grane.end());
+        int brojGrana = 0;
+
+        for(pair<int, pair<int, int> > grana : grane)
+        {
+            if(brojGrana == brojCvorova-1) break;
+            
+            int tezinaGrane = grana.first;
+            int u = grana.second.first;
+            int v = grana.second.second;
+
+            int skupU = findKruskal(u);
+            int skupV = findKruskal(v);
+
+            //? ako nam cvorovi ne pripadaju istom skupu, jer ne zelimo ciklus
+            if(skupU != skupV)
+            {
+                cout << u << " " << v << " - tezina grane: " << tezinaGrane << endl;
+                unionKruskal(u, v);
+            }
+        }
+    }
 
 private:
     //? Osnovne inicijalizacije
@@ -371,6 +409,7 @@ private:
 
     //? mostovi i artikulacione tacke (ids i lowLink koristi i Tarjan   )
     //? roditelje koristi Dijkstra, Belman-Ford
+    //? ids koristi union-find
     int id;
     vector<int> ids;
     vector<int> lowLink;
@@ -381,9 +420,13 @@ private:
     stack<int> slcStack;
 
     //? Dijkstra, Belman-Ford
-    vector<vector<pair<int, int> > > listaSaTezinama;
+    vector<vector<pair<int, int>> > listaSaTezinama;
     vector<int> udaljenost;
     vector<bool> postojiPutDoCvora;
+
+    //? Union-Find - za Kruskala
+    vector<int> velicinaKomponente;
+    vector<int> kruskalIds;
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
@@ -413,6 +456,43 @@ private:
         cout << endl;
         cout << "Zavrsio sa najkracim putem" << endl;
     }
+
+    int findKruskal(int x)
+    {
+        //? Nalazimo ko je koren od x
+        int koren = x;
+        while(koren != kruskalIds[x])
+            koren = kruskalIds[koren];
+
+        //? radimo kompresiju puta od x do korena
+        while(x != koren)
+        {
+            int sledeci = kruskalIds[x];
+            kruskalIds[x] = koren;
+            x = sledeci;
+        }
+        return koren;
+    }
+    void unionKruskal(int x, int y)
+    {
+        int koren1 = findKruskal(x);
+        int koren2 = findKruskal(y);
+
+        //? ako su vec u istoj komponenti ne zelimo nista da radimo
+        if(koren1 == koren2) return;
+
+        if(velicinaKomponente[koren1] < velicinaKomponente[koren2])
+        {
+            velicinaKomponente[koren2] += velicinaKomponente[koren1];
+            kruskalIds[koren1] = koren2;
+        }
+        else
+        {
+            velicinaKomponente[koren1] += velicinaKomponente[koren2];
+            kruskalIds[koren2] = koren1;
+        }
+    }
+
 };
 
 int main()
@@ -420,12 +500,12 @@ int main()
     Graf graf(6);
     graf.dodajGranuSaTezinom(0, 1, 2);//
     graf.dodajGranuSaTezinom(0, 2, 3);//
-    graf.dodajGranuSaTezinom(1, 2, 5);//
+    graf.dodajGranuSaTezinom(1, 2, 1);//
     graf.dodajGranuSaTezinom(1, 4, 1);//
     graf.dodajGranuSaTezinom(4, 3, 7);//
     graf.dodajGranuSaTezinom(2, 3, 2);
     graf.dodajGranuSaTezinom(2, 5, 4);
 
 
-    graf.prim();
+    graf.kruskal();
 }
