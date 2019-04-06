@@ -5,7 +5,7 @@
 #include <stack>
 #include <climits>
 
-#define INF (INT_MAX)
+#define INF (100000)
 #define NEG_INF (INT_MIN)
 
 using namespace std;
@@ -54,6 +54,21 @@ public:
         kruskalIds.reserve(brojCvorova);
         for(int i = 0; i < brojCvorova; i++)
             kruskalIds[i] = i;
+
+        //? flojd-varsal
+        fwMatrica.resize(brojCvorova);
+        for(int i = 0; i < brojCvorova; i++)
+            fwMatrica[i].resize(brojCvorova);
+        
+        for(int i = 0; i < brojCvorova; i++)
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                if(i == j)
+                    fwMatrica[i][j] = 0;
+                else 
+                    fwMatrica[i][j] = INF;
+            }
+
     
     }
 
@@ -265,6 +280,10 @@ public:
         }
     }
 
+    void fwDodajGranu(int u, int v, int tezina)
+    {
+        fwMatrica[u][v] = tezina;
+    }
     void dodajGranuSaTezinom(int u, int v, int tezina)
     {
         listaSaTezinama[u].push_back(make_pair(v, tezina));
@@ -390,6 +409,31 @@ public:
             {
                 cout << u << " " << v << " - tezina grane: " << tezinaGrane << endl;
                 unionKruskal(u, v);
+                brojGrana++;
+            }
+        }
+    }
+
+    void flojdVarsal()
+    {
+        for(int k = 0; k < brojCvorova; k++)
+        {
+            for(int i = 0; i < brojCvorova; i++)
+            {
+                for(int j = 0; j < brojCvorova; j++)
+                {
+                    if(fwMatrica[i][j] > fwMatrica[i][k] + fwMatrica[k][j])
+                        fwMatrica[i][j] = fwMatrica[i][k] + fwMatrica[k][j];
+                }
+            }
+        }
+
+        for(int i = 0; i < brojCvorova; i++)
+        {
+            if(fwMatrica[i][i] < 0)
+            {
+                cout << "NEGATIVAN CIKLUS" << endl;
+                return;
             }
         }
     }
@@ -427,6 +471,9 @@ private:
     //? Union-Find - za Kruskala
     vector<int> velicinaKomponente;
     vector<int> kruskalIds;
+
+    //?Flojd Varsal
+    vector<vector<int>> fwMatrica;
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
@@ -497,15 +544,11 @@ private:
 
 int main()
 {
-    Graf graf(6);
-    graf.dodajGranuSaTezinom(0, 1, 2);//
-    graf.dodajGranuSaTezinom(0, 2, 3);//
-    graf.dodajGranuSaTezinom(1, 2, 1);//
-    graf.dodajGranuSaTezinom(1, 4, 1);//
-    graf.dodajGranuSaTezinom(4, 3, 7);//
-    graf.dodajGranuSaTezinom(2, 3, 2);
-    graf.dodajGranuSaTezinom(2, 5, 4);
+    Graf g(4);
+    g.fwDodajGranu(0, 1, 1);
+    g.fwDodajGranu(1, 2, 1);
+    g.fwDodajGranu(2, 3, 1);
+    g.fwDodajGranu(3, 0, 1);
 
-
-    graf.kruskal();
+    g.flojdVarsal();
 }
