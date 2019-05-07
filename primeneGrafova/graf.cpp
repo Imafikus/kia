@@ -6,7 +6,7 @@
 #include <climits>
 
 #define INF (100000)
-#define NEG_INF (INT_MIN)
+#define NEG_INF (-100000)
 
 using namespace std;
 
@@ -337,25 +337,28 @@ public:
 
         udaljenost[0] = 0;
         heap.push(make_pair(0, udaljenost[0]));
-        jePosecen[0] == true;
 
         //? Postavljamo udaljenosti od svih ostalih cvorova na INF
-        for(int i = 1; i < brojCvorova; i++)
-            heap.push(make_pair(i, INF));
+        for(int cvor = 1; cvor < brojCvorova; cvor++)
+            heap.push(make_pair(cvor, INF));
 
-        while(!heap.empty())
+        for(int i = 0; i < brojCvorova; i++)
         {
             pair<int, int> najbliziCvor = heap.top();
             heap.pop();
 
+            int cvor = najbliziCvor.first;
+            cout << "JEBENA VREDNOST CVORA: " << cvor << endl;
+            int duzinaPuta = najbliziCvor.second;
+
             //?rastojanje do ovog cvora ce biti tezina grane koja spaja taj i trenutni cvor
-            udaljenost[najbliziCvor.first] = najbliziCvor.second;
+            //udaljenost[cvor] = duzinaPuta;
 
-            if(!jePosecen[najbliziCvor.first])
+            if(!jePosecen[cvor])
             {
-                jePosecen[najbliziCvor.first] = true;
+                jePosecen[cvor] = true;
 
-                for(pair<int, int> sused: listaSaTezinama[najbliziCvor.first])
+                for(pair<int, int> sused: listaSaTezinama[cvor])
                 {
                     if(!jePosecen[sused.first])
                     {
@@ -364,14 +367,21 @@ public:
                         //? onda update-ujemo vrednost
                         if(sused.second < udaljenost[sused.first])
                         {
+                            cout << "Usao u if" << endl;
+                            cout << "udaljenost" << udaljenost[sused.first] << endl;
                             udaljenost[sused.first] = sused.second;
-                            roditeljCvora[sused.first] = najbliziCvor.first;
+                            
+                            cout << "udaljenost posle" << udaljenost[sused.first] << endl;
+                            
+                            roditeljCvora[sused.first] = cvor;
                             
                             heap.push(make_pair(sused.first, udaljenost[sused.first]));
                         }
                     }
                 }
             }
+            else 
+                i--;
         }
         for(int cvor = 1; cvor < brojCvorova; cvor++)
         {
@@ -463,7 +473,7 @@ private:
     vector<bool> uSteku;
     stack<int> slcStack;
 
-    //? Dijkstra, Belman-Ford
+    //? Dijkstra, Prim, Belman-Ford
     vector<vector<pair<int, int>> > listaSaTezinama;
     vector<int> udaljenost;
     vector<bool> postojiPutDoCvora;
@@ -544,11 +554,13 @@ private:
 
 int main()
 {
-    Graf g(4);
-    g.fwDodajGranu(0, 1, 1);
-    g.fwDodajGranu(1, 2, 1);
-    g.fwDodajGranu(2, 3, 1);
-    g.fwDodajGranu(3, 0, 1);
-
-    g.flojdVarsal();
+    Graf g(5);
+    g.dodajGranuSaTezinom(0, 1, 1);
+    g.dodajGranuSaTezinom(1, 2, 2);
+    g.dodajGranuSaTezinom(2, 3, 3);
+    g.dodajGranuSaTezinom(2, 4, 5);
+    g.dodajGranuSaTezinom(3, 0, 1);
+    g.dodajGranuSaTezinom(3, 4, 1);
+    g.prim();
+    g.kruskal();
 }
