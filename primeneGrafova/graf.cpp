@@ -348,12 +348,9 @@ public:
             heap.pop();
 
             int cvor = najbliziCvor.first;
-            cout << "JEBENA VREDNOST CVORA: " << cvor << endl;
             int duzinaPuta = najbliziCvor.second;
 
             //?rastojanje do ovog cvora ce biti tezina grane koja spaja taj i trenutni cvor
-            //udaljenost[cvor] = duzinaPuta;
-
             if(!jePosecen[cvor])
             {
                 jePosecen[cvor] = true;
@@ -367,11 +364,7 @@ public:
                         //? onda update-ujemo vrednost
                         if(sused.second < udaljenost[sused.first])
                         {
-                            cout << "Usao u if" << endl;
-                            cout << "udaljenost" << udaljenost[sused.first] << endl;
                             udaljenost[sused.first] = sused.second;
-                            
-                            cout << "udaljenost posle" << udaljenost[sused.first] << endl;
                             
                             roditeljCvora[sused.first] = cvor;
                             
@@ -422,6 +415,48 @@ public:
                 brojGrana++;
             }
         }
+    }
+
+    void belmanFord()
+    {
+
+        udaljenost[0] = 0;
+
+        for(int v = 0; v < brojCvorova; v++)
+        {
+            for(int trenutniCvor = 0; trenutniCvor < brojCvorova; trenutniCvor++)
+            {
+                for(int j = 0; j < listaSaTezinama[j].size(); j++)
+                {
+                    int sused = listaSaTezinama[trenutniCvor][j].first;
+                    int grana = listaSaTezinama[trenutniCvor][j].second;
+
+                    if(udaljenost[trenutniCvor] + grana < udaljenost[sused])
+                    {
+                        udaljenost[sused] = udaljenost[trenutniCvor] + grana;
+                        roditeljCvora[sused] = trenutniCvor;
+                    }
+
+                }
+            }
+        }
+
+        for(int trenutniCvor = 0; trenutniCvor < brojCvorova; trenutniCvor++)
+            {
+                for(int j = 0; j < listaSaTezinama[j].size(); j++)
+                {
+                    int sused = listaSaTezinama[trenutniCvor][j].first;
+                    int grana = listaSaTezinama[trenutniCvor][j].second;
+
+                    if(udaljenost[trenutniCvor] + grana < udaljenost[sused])
+                    {
+                        cout << "NEGATIVAN CIKLUS" << endl;
+                        return;
+                    }
+                }
+            }
+        for(int cvor = 1; cvor < brojCvorova; cvor++)
+            stampajNajkraciPut(cvor);
     }
 
     void flojdVarsal()
@@ -487,8 +522,8 @@ private:
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
-        cout << "stampajNajkraciPut" << endl;
         stack<int> najkraciPut;
+
         while(roditeljCvora[krajnjiCvor] != -1)
         {
             najkraciPut.push(krajnjiCvor);
@@ -497,7 +532,6 @@ private:
         //? pushujemo i pocetni cvor
         najkraciPut.push(krajnjiCvor);
 
-        cout << "dosao pred while" << endl;
         while(!najkraciPut.empty())
         {
             int cvor = najkraciPut.top();
@@ -511,7 +545,6 @@ private:
                 cout << cvor << " -> ";
         }
         cout << endl;
-        cout << "Zavrsio sa najkracim putem" << endl;
     }
 
     int findKruskal(int x)
@@ -554,13 +587,10 @@ private:
 
 int main()
 {
-    Graf g(5);
+    Graf g(4);
     g.dodajGranuSaTezinom(0, 1, 1);
     g.dodajGranuSaTezinom(1, 2, 2);
     g.dodajGranuSaTezinom(2, 3, 3);
-    g.dodajGranuSaTezinom(2, 4, 5);
-    g.dodajGranuSaTezinom(3, 0, 1);
-    g.dodajGranuSaTezinom(3, 4, 1);
-    g.prim();
-    g.kruskal();
+    g.dodajGranuSaTezinom(2, 0, -5);
+    g.belmanFord();
 }
