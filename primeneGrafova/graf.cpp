@@ -69,7 +69,19 @@ public:
                     fwMatrica[i][j] = INF;
             }
 
-    
+        //? tranzitivno zatvorenje
+        tzMatrica.resize(brojCvorova);
+        for(int i = 0; i < brojCvorova; i++)
+            tzMatrica[i].resize(brojCvorova);
+        
+        for(int i = 0; i < brojCvorova; i++)
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                if(i == j)
+                    tzMatrica[i][j] = true;
+                else 
+                    tzMatrica[i][j] = false;
+            }    
     }
 
     void dfs(int cvor, bool dozvoljenoPisanje = true)
@@ -206,7 +218,7 @@ public:
         }
     }
 
-    void nadjiArkTacke(int cvor)
+    void nadjiArtTacke(int cvor)
     {
         jePosecen[cvor] = true;
 
@@ -224,7 +236,7 @@ public:
             decaCvora++;
             
             if(!jePosecen[sused])
-                nadjiArkTacke(sused);
+                nadjiArtTacke(sused);
             
             lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
 
@@ -326,6 +338,7 @@ public:
         }
         stampajNajkraciPut(krajnjiCvor);
     }
+
     void prim()
     {
         priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>> > heap;
@@ -381,6 +394,7 @@ public:
             cout << roditeljCvora[cvor] << " " << cvor << " tezina: "<< udaljenost[cvor] << endl;
         }
     }
+
     void kruskal()
     {
         vector<pair<int, pair<int, int>> >grane;
@@ -483,6 +497,52 @@ public:
         }
     }
 
+    void nadjiTranzitivnoZatvorenje() 
+    {
+        cout << "nadjiTranzitivnoZatvorenje:" << endl;
+        //? Sigurno postoje putevi izmedju cvorova izmedju kojih je
+        //? direktna grana
+        for(int cvor = 0; cvor < brojCvorova; cvor++)
+        {
+            for(int sused : listaPovezanosti[cvor])
+            {
+                tzMatrica[cvor][sused] = true;
+            }
+        }
+
+        cout << "Tranzitivno zatvorenje susedi:" << endl;
+        for(int i = 0; i < brojCvorova; i++) 
+        {
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                cout << tzMatrica[i][j] << " ";
+            }
+            cout << endl;
+        }
+
+        //? Gledamo da li postoji put od i do j preko nekog cvora m
+        for(int m = 0; m < brojCvorova; m++)
+        {
+            for(int i = 0; i < brojCvorova; i++)
+            {
+                for(int j = 0; j < brojCvorova; j++)
+                {
+                    if(tzMatrica[i][m] && tzMatrica[m][j])
+                        tzMatrica[i][j] = true;
+                }
+            }
+        }
+
+        cout << "Tranzitivno zatvorenje:" << endl;
+        for(int i = 0; i < brojCvorova; i++) 
+        {
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                cout << tzMatrica[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -519,6 +579,9 @@ private:
 
     //?Flojd Varsal
     vector<vector<int>> fwMatrica;
+
+    //? Tranzitivno zatvorenje
+    vector<vector<bool>> tzMatrica;
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
@@ -587,10 +650,10 @@ private:
 
 int main()
 {
-    Graf g(4);
-    g.dodajGranuSaTezinom(0, 1, 1);
-    g.dodajGranuSaTezinom(1, 2, 2);
-    g.dodajGranuSaTezinom(2, 3, 3);
-    g.dodajGranuSaTezinom(2, 0, -5);
-    g.belmanFord();
+    Graf g(5);
+    g.dodajGranu(0, 1);
+    g.dodajGranu(1, 2);
+    g.dodajGranu(2, 3);
+    g.dodajGranu(4, 3);
+    g.nadjiTranzitivnoZatvorenje();
 }
