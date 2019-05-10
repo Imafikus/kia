@@ -69,18 +69,18 @@ public:
                     fwMatrica[i][j] = INF;
             }
 
-        //? tranzitivno zatvorenje
-        tzMatrica.resize(brojCvorova);
+        //? tranzitivno zatvorenje, tranzitivna redukcija
+        tztrMatrica.resize(brojCvorova);
         for(int i = 0; i < brojCvorova; i++)
-            tzMatrica[i].resize(brojCvorova);
+            tztrMatrica[i].resize(brojCvorova);
         
         for(int i = 0; i < brojCvorova; i++)
             for(int j = 0; j < brojCvorova; j++)
             {
                 if(i == j)
-                    tzMatrica[i][j] = true;
+                    tztrMatrica[i][j] = true;
                 else 
-                    tzMatrica[i][j] = false;
+                    tztrMatrica[i][j] = false;
             }    
     }
 
@@ -507,25 +507,14 @@ public:
 
     void nadjiTranzitivnoZatvorenje() 
     {
-        cout << "nadjiTranzitivnoZatvorenje:" << endl;
         //? Sigurno postoje putevi izmedju cvorova izmedju kojih je
         //? direktna grana
         for(int cvor = 0; cvor < brojCvorova; cvor++)
         {
             for(int sused : listaPovezanosti[cvor])
             {
-                tzMatrica[cvor][sused] = true;
+                tztrMatrica[cvor][sused] = true;
             }
-        }
-
-        cout << "Tranzitivno zatvorenje susedi:" << endl;
-        for(int i = 0; i < brojCvorova; i++) 
-        {
-            for(int j = 0; j < brojCvorova; j++)
-            {
-                cout << tzMatrica[i][j] << " ";
-            }
-            cout << endl;
         }
 
         //? Gledamo da li postoji put od i do j preko nekog cvora m
@@ -535,8 +524,8 @@ public:
             {
                 for(int j = 0; j < brojCvorova; j++)
                 {
-                    if(tzMatrica[i][m] && tzMatrica[m][j])
-                        tzMatrica[i][j] = true;
+                    if(tztrMatrica[i][m] && tztrMatrica[m][j])
+                        tztrMatrica[i][j] = true;
                 }
             }
         }
@@ -546,13 +535,65 @@ public:
         {
             for(int j = 0; j < brojCvorova; j++)
             {
-                cout << tzMatrica[i][j] << " ";
+                cout << tztrMatrica[i][j] << " ";
             }
             cout << endl;
         }
     }
 
-    void nadjiOjlerovCiklus()
+    //! NE RADI BEZ TRANZITIVNOG ZATVORENJA
+    void nadjiTranzitivnuRedukciju()
+    {
+
+        //? Moramo da ubijemo rastojanja cvora od samog sebe jer
+        //? ne znamo da li mozemo da dodjemo do tog cvora ili ne
+        for(int i = 0; i < brojCvorova; i++)
+        {
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                tztrMatrica[i][j] = false;
+            }
+        }
+
+        //? Sigurno postoje putevi izmedju cvorova koji su susedi
+        for(int cvor = 0; cvor < brojCvorova; cvor++)
+        {
+            for(int sused: listaPovezanosti[cvor])
+            {
+                tztrMatrica[cvor][sused] = true;
+            }
+        }
+
+        for(int m = 0; m < brojCvorova; m++)
+        {
+            for(int i = 0; i < brojCvorova; i++)
+            {
+                if(tztrMatrica[i][m] == true)
+                {
+                    for(int j = 0; j < brojCvorova; j++)
+                    {
+                        //? Ako postoji put izmedju cvorova (i, m) i cvorova (m, j) onda nam ne
+                        //? treba put izmedju (i, j)
+
+                        if(tztrMatrica[m][j] == true)
+                            tztrMatrica[i][j] = false;
+                    }
+                }
+            }
+        }
+
+        cout << "Tranzitivna redukcija:" << endl;
+        for(int i = 0; i < brojCvorova; i++) 
+        {
+            for(int j = 0; j < brojCvorova; j++)
+            {
+                cout << tztrMatrica[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+
+    void nadjiOjlerovCiklusHircholer()
     {
         stack<int> tekuciPut;
         vector<int> ojlerovCiklus;
@@ -573,7 +614,6 @@ public:
                 //? dodajemo narednu granu i cvor od kog ce se nastaviti ciklus
                 //? tu granu sklanjamo iz liste povezanosti kako je ne bismo ponovo racunali negde
                 int naredniCvor = listaPovezanosti[tekuciCvor].back();
-                //listaPovezanosti[tekuciCvor].pop_back();
                 obrisiNeusmerenuGranu(tekuciCvor, naredniCvor);
                 tekuciCvor = naredniCvor;
             }
@@ -599,7 +639,41 @@ public:
         cout << endl;
     }
 
-private:
+    void nadjiOjlerovCiklusFleri()
+    {
+        stack<int> tekuciPut;
+        vector<int> ojlerovCiklus;
+
+        int tekuciCvor = 0;
+        tekuciPut.push(tekuciCvor);
+
+        while(!tekuciPut.empty())
+        {
+            tekuciCvor = tekuciPut.top();
+
+            if(listaPovezanosti[tekuciCvor].size())
+            {
+                int naredniCvor = listaPovezanosti[tekuciCvor].back();
+                tekuciPut.push(naredniCvor);
+                listaPovezanosti[tekuciCvor].pop_back();
+            }
+            else
+            {
+                ojlerovCiklus.push_back(tekuciCvor);
+                tekuciPut.pop();
+            }
+        }
+
+        cout << "Ojlerov ciklus" << endl;
+        cout << "Ojlerov ciklus velicina: " << ojlerovCiklus.size() << endl;
+
+        for(int cvor : ojlerovCiklus)
+        {
+            cout << cvor << " ";
+        }
+        cout << endl;
+    }
+
     //? Osnovne inicijalizacije
     int brojCvorova;
     vector<vector<int>> listaPovezanosti;
@@ -636,8 +710,8 @@ private:
     //?Flojd Varsal
     vector<vector<int>> fwMatrica;
 
-    //? Tranzitivno zatvorenje
-    vector<vector<bool>> tzMatrica;
+    //? Tranzitivno zatvorenje, tranzitivna redukcija
+    vector<vector<bool>> tztrMatrica;
 
     void stampajNajkraciPut(int krajnjiCvor)
     {
@@ -718,27 +792,23 @@ private:
 
 int main()
 {
-    Graf g(11);
+    // Graf g(4);
+    // g.dodajGranuUsmeren(0, 1);
+    // g.dodajGranuUsmeren(0, 2);
+    // g.dodajGranuUsmeren(0, 3);
+
+    // g.dodajGranuUsmeren(1, 2);
+
+    // g.dodajGranuUsmeren(2, 3);
+
+    // g.nadjiTranzitivnuRedukciju();
+    Graf g(4);
+
     g.dodajGranuNeusmeren(0, 1);
-    g.dodajGranuNeusmeren(0, 2);
     g.dodajGranuNeusmeren(1, 2);
-
-    g.dodajGranuNeusmeren(2, 4);
     g.dodajGranuNeusmeren(2, 3);
-    g.dodajGranuNeusmeren(4, 3);
+    g.dodajGranuNeusmeren(3, 0);
+    g.nadjiOjlerovCiklusFleri();
 
 
-    g.dodajGranuNeusmeren(2, 5);
-    g.dodajGranuNeusmeren(5, 7);
-    g.dodajGranuNeusmeren(7, 6);
-    g.dodajGranuNeusmeren(5, 6);
-    
-    g.dodajGranuNeusmeren(5, 8);
-
-    g.dodajGranuNeusmeren(2, 8);
-    g.dodajGranuNeusmeren(8, 10);
-    g.dodajGranuNeusmeren(10, 9);
-    g.dodajGranuNeusmeren(9, 8);
-
-    g.nadjiOjlerovCiklus();
 }
