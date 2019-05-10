@@ -143,9 +143,17 @@ public:
         }
     }
 
-    void dodajGranu(int u, int v)
+    void dodajGranuUsmeren(int u, int v)
     {
         listaPovezanosti[u].push_back(v);
+        ulazniStepen[v]++;
+    }
+
+    void dodajGranuNeusmeren(int u, int v)
+    {
+        listaPovezanosti[u].push_back(v);
+        listaPovezanosti[v].push_back(u);
+        ulazniStepen[u]++;
         ulazniStepen[v]++;
     }
 
@@ -543,6 +551,54 @@ public:
             cout << endl;
         }
     }
+
+    void nadjiOjlerovCiklus()
+    {
+        stack<int> tekuciPut;
+        vector<int> ojlerovCiklus;
+
+        int tekuciCvor = 0;
+        tekuciPut.push(tekuciCvor);
+
+        while(!tekuciPut.empty())
+        {
+            //? ako i dalje postoji neka grana iz trekuceg cvora ulecemo u nju
+            //? BITNO: moze se desiti da iz jedne grane nadjemo vise ciklusa (kao primer u skripti)
+            //? iz grane izlazimo tek kad smo obisli sve njene susede
+            
+            if(listaPovezanosti[tekuciCvor].size())
+            {
+                tekuciPut.push(tekuciCvor);
+
+                //? dodajemo narednu granu i cvor od kog ce se nastaviti ciklus
+                //? tu granu sklanjamo iz liste povezanosti kako je ne bismo ponovo racunali negde
+                int naredniCvor = listaPovezanosti[tekuciCvor].back();
+                //listaPovezanosti[tekuciCvor].pop_back();
+                obrisiNeusmerenuGranu(tekuciCvor, naredniCvor);
+                tekuciCvor = naredniCvor;
+            }
+            else 
+            {
+                //? vracamo se nazad kroz grane da bismo nasli cvorove kod kojih postoje neposeceni
+                //? susedi. Kako smo sklanjali sve grane kojima smo prosli, ovako cemo sigurno naleteti na neki ciklus ponovo
+
+                ojlerovCiklus.push_back(tekuciCvor);
+                
+                tekuciCvor = tekuciPut.top();
+                tekuciPut.pop();
+            }
+        }
+
+        cout << "Ojlerov ciklus" << endl;
+        cout << "Ojlerov ciklus velicina: " << ojlerovCiklus.size() << endl;
+
+        for(int cvor : ojlerovCiklus)
+        {
+            cout << cvor << " ";
+        }
+        cout << endl;
+    }
+
 private:
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -646,14 +702,43 @@ private:
         }
     }
 
+    void obrisiUsmerenuGranu(int u, int v) 
+    {       
+        auto it = find(listaPovezanosti[u].begin(), listaPovezanosti[u].end(), v);
+        listaPovezanosti[u].erase(it);
+    }
+
+    void obrisiNeusmerenuGranu(int u, int v)
+    {
+        obrisiUsmerenuGranu(u, v);
+        obrisiUsmerenuGranu(v, u);
+    }
+
 };
 
 int main()
 {
-    Graf g(5);
-    g.dodajGranu(0, 1);
-    g.dodajGranu(1, 2);
-    g.dodajGranu(2, 3);
-    g.dodajGranu(4, 3);
-    g.nadjiTranzitivnoZatvorenje();
+    Graf g(11);
+    g.dodajGranuNeusmeren(0, 1);
+    g.dodajGranuNeusmeren(0, 2);
+    g.dodajGranuNeusmeren(1, 2);
+
+    g.dodajGranuNeusmeren(2, 4);
+    g.dodajGranuNeusmeren(2, 3);
+    g.dodajGranuNeusmeren(4, 3);
+
+
+    g.dodajGranuNeusmeren(2, 5);
+    g.dodajGranuNeusmeren(5, 7);
+    g.dodajGranuNeusmeren(7, 6);
+    g.dodajGranuNeusmeren(5, 6);
+    
+    g.dodajGranuNeusmeren(5, 8);
+
+    g.dodajGranuNeusmeren(2, 8);
+    g.dodajGranuNeusmeren(8, 10);
+    g.dodajGranuNeusmeren(10, 9);
+    g.dodajGranuNeusmeren(9, 8);
+
+    g.nadjiOjlerovCiklus();
 }
