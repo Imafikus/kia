@@ -248,9 +248,10 @@ public:
             
             lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
 
+            //? pocetni cvor
             if(roditeljCvora[cvor] == -1 && decaCvora > 1)
                 cout << cvor << " ";
-            
+            //? Ili je most ili je ciklus
             if(roditeljCvora[cvor] != -1 && ids[cvor] <= lowLink[sused])
                 cout << cvor << " ";
             else
@@ -792,16 +793,6 @@ public:
 
 int main()
 {
-    // Graf g(4);
-    // g.dodajGranuUsmeren(0, 1);
-    // g.dodajGranuUsmeren(0, 2);
-    // g.dodajGranuUsmeren(0, 3);
-
-    // g.dodajGranuUsmeren(1, 2);
-
-    // g.dodajGranuUsmeren(2, 3);
-
-    // g.nadjiTranzitivnuRedukciju();
     Graf g(4);
 
     g.dodajGranuNeusmeren(0, 1);

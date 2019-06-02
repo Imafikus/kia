@@ -95,7 +95,15 @@ public:
         return (kAB == kAC);
     }
 
+    double orijentacija(vector<double> A, vector<double> B, vector<double> C)
+    {
+        double ax = A[0]; double ay = A[1];
+        double bx = B[0]; double by = B[1];
+        double cx = C[0]; double cy = C[1];
 
+        double d = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+        return d;
+    }
 private:
 
 };
@@ -123,16 +131,23 @@ void stampajVektor(vector<double> a)
 int main()
 {
     Geometrija g = Geometrija();
-    vector<double> a = {1, 1};
-    vector<double> b = {2, 2};
-    vector<double> c = {3, 4};
+    vector<double> a = {0, 0};
+    vector<double> b = {1, 0};
+    vector<double> c = {0, 1};
 
-    if (g.kolinearneTacke(a, b, c))
+    double d = g.orijentacija(a, b, c);
+    cout << d << endl;
+
+    if (d > 0)
     {
-        cout << "Tacke su kolinearne" << endl;
+        cout << "Pozitivna orijentacija" << endl;
     } 
-    else 
+    else if (d < 0)
     {
-        cout << "Tacke nisu kolinearne" << endl;
+        cout << "Negativna orijentacija" << endl;
+    }
+    else
+    {
+        cout << "Kolinearne tacke" << endl;
     }
 }
