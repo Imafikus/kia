@@ -79,10 +79,20 @@ public:
 
         return intenzitet(vektorskiProizvod3d(ab, ac)) / 2;
     }
+
     double povrsinaTrouglaPertle(vector<double> a, vector<double> b, vector<double> c)
     {
         double p = (a[0] * b[1] + b[0] * c[1] + c[0] * a[1]) - (a[0] * c[1] + c[0] * b[1] + b[0] * a[1]);
         return p / 2;
+    }
+
+    bool kolinearneTacke(vector<double> A, vector<double> B, vector<double> C)
+    {
+        //? Tacke ce biti jednake ako je k za AB i k za AC jednako
+        double kAB = (B[1] - A[1]) / (B[0] - A[0]);
+        double kAC = (C[1] - A[1]) / (C[0] - A[0]);
+
+        return (kAB == kAC);
     }
 
 
@@ -114,11 +124,15 @@ int main()
 {
     Geometrija g = Geometrija();
     vector<double> a = {1, 1};
-    vector<double> b = {0, 1};
-    vector<double> c = {1, 0};
+    vector<double> b = {2, 2};
+    vector<double> c = {3, 4};
 
-    cout << "Povrsina Heron: " << g.povrsinaTrouglaHeron(a, b, c) << endl;
-    cout << "Povrsina vektorski proizvod: " << g.povrsinaTrouglaVektorskiProizvod(a, c) << endl;
-    cout << "Povrsina pertle: " << g.povrsinaTrouglaPertle(a, b, c) << endl;
-
+    if (g.kolinearneTacke(a, b, c))
+    {
+        cout << "Tacke su kolinearne" << endl;
+    } 
+    else 
+    {
+        cout << "Tacke nisu kolinearne" << endl;
+    }
 }
