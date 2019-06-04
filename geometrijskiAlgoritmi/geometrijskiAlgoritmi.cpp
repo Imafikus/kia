@@ -104,6 +104,55 @@ public:
         double d = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
         return d;
     }
+
+    bool tackaUnutarNekonveksnogPoligona(vector<pair<double, double>> poligon, vector<double> A)
+    {
+        int brojPreseka = 0;
+
+        int n = poligon.size();
+        for(int i = 0; i < n; i++)
+        {
+            //? ovo se radi da, umesto da odemo van niza da, se vratimo na 0ti element
+            int j = (i + 1) % n;
+
+            vector<double> M1 = {poligon[i].first, poligon[i].second};
+            vector<double> M2 = {poligon[j].first, poligon[j].second};
+
+            //? proveravamo da li je A izmedju M1 i M2 u odnosu na X osu
+            bool izmedjuTacaka = (A[0] > min(M1[0], M2[0]) && A[0] < max(M1[0], M2[0]));
+            
+            // cout << "izmedjuTacaka: " << izmedjuTacaka << endl;
+            // cout << "Tacke: " << M1[0] << " " << M1[1] << "   " << M2[0] << " " << M2[1] << endl;
+            // cout << endl;
+            //? Ovo je tacka koja je na istoj X kkordinati kao A, ali je sigurno ispod M1 i M2
+            if(izmedjuTacaka && A[1] > max(M1[1], M2[1]))
+            {
+                //? uzimamo A1 tako da ima X koordinatu kao A, a da joj Y koordinata sigurno bude manja od manje koordinate M1 i M2
+                vector<double> A1 = {A[0], min(M1[1], M2[1]) - 1};
+                // cout << "A1: " << A1[0] << " " << A1[1] << endl;
+                
+                double orM1 = orijentacija(A, A1, M1);
+                double orM2 = orijentacija(A, A1, M2);
+            
+                // cout << "orM1: " << orM1 << endl;
+                // cout << "orM2: " << orM2 << endl; 
+                // cout << endl;
+
+                //? ako ovo vazi znamo da su tacke sa razlicitih strana duzi koja ce, te ovo znaci da imamo presek sa tom duzi
+                if(orM1 != orM2)
+                    brojPreseka++;
+            }
+        }
+        // cout << "Broj preseka: " << brojPreseka << endl;
+        if(brojPreseka % 2 == 0)
+        {
+            return false;
+        }
+        else 
+        {
+            return true;
+        }
+    }
 private:
 
 };
@@ -131,23 +180,16 @@ void stampajVektor(vector<double> a)
 int main()
 {
     Geometrija g = Geometrija();
-    vector<double> a = {0, 0};
-    vector<double> b = {1, 0};
-    vector<double> c = {0, 1};
-
-    double d = g.orijentacija(a, b, c);
-    cout << d << endl;
-
-    if (d > 0)
+    vector<pair<double, double>> Poligon = {{0, 0}, {0, 1}, {1, 1}, {1, 0}};
+    vector<double> A = {2, 2};
+    
+    
+    if(g.tackaUnutarNekonveksnogPoligona(Poligon, A))
     {
-        cout << "Pozitivna orijentacija" << endl;
-    } 
-    else if (d < 0)
-    {
-        cout << "Negativna orijentacija" << endl;
+        cout << "Tacka unutar poligona" << endl;
     }
     else
     {
-        cout << "Kolinearne tacke" << endl;
+        cout << "Tacka nije unutar poligona" << endl;
     }
 }
