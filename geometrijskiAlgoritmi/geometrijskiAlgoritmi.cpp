@@ -94,6 +94,21 @@ public:
 
         return (kAB == kAC);
     }
+    
+    bool pripadaTrouglu(vector<double> A, vector<double> B, vector<double> C, vector<double> P)
+    {
+        double ABP = orijentacija(A, B, P);
+        double BCP = orijentacija(B, C, P);
+        double CAP = orijentacija(C, A, P);
+
+        if(ABP >= 0 && BCP >= 0 && CAP >= 0)
+            return true;
+        
+        if(ABP <= 0 && BCP <= 0 && CAP <= 0)
+            return true;
+        
+        return false;
+    }
 
     double orijentacija(vector<double> A, vector<double> B, vector<double> C)
     {
@@ -180,16 +195,19 @@ void stampajVektor(vector<double> a)
 int main()
 {
     Geometrija g = Geometrija();
-    vector<pair<double, double>> Poligon = {{0, 0}, {0, 1}, {1, 1}, {1, 0}};
-    vector<double> A = {2, 2};
+    
+    vector<double> A = {0, 0};
+    vector<double> B = {0, 1};
+    vector<double> C = {1, 0};
+    vector<double> P = {-1, 0};
     
     
-    if(g.tackaUnutarNekonveksnogPoligona(Poligon, A))
+    if(g.pripadaTrouglu(A, B, C, P))
     {
-        cout << "Tacka unutar poligona" << endl;
+        cout << "Tacka pripada" << endl;
     }
     else
     {
-        cout << "Tacka nije unutar poligona" << endl;
+        cout << "Tacka ne pripada" << endl;
     }
 }
