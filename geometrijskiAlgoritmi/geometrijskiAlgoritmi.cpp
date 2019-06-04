@@ -168,6 +168,44 @@ public:
             return true;
         }
     }
+
+    bool tackaUnutarKonveksnogPoligona(vector<pair<double, double>> poligon, vector<double> A)
+    {
+        //? Zakucamo start na neku tacku, prva je najlaksa
+        vector<double> start = {poligon[0].first, poligon[0].second};
+
+        //? Pocetne granice su levo i desno od starta (n-1 i 1 tacka)
+        //? Binarnom pretragom cemo da smanjujemo na pola nas poligon svaki put
+        //? U zavisnosti od orijentacije trougla koji prave start, srednja tacka i A
+        int l = poligon.size() - 1;
+        int d = 1;
+
+        vector<double> levaTacka = {poligon[l].first, poligon[l].second};
+        vector<double> desnaTacka = {poligon[d].first, poligon[d].second};
+
+        while(abs(l - d) > 1)
+        {
+            int s = (l + d) / 2;
+            vector<double> sredina = {poligon[s].first, poligon[s].second};
+
+            //? ako je orijentacija veca od 0, znaci da je tacka desno od [start, sredina] duzi
+            if(orijentacija(start, sredina, A) > 0)
+            {
+                levaTacka = {poligon[s].first, poligon[s].second};
+                l = s;
+            }
+            else
+            {
+                desnaTacka = {poligon[s].first, poligon[s].second};
+                d = s;
+            }
+        }
+        //? Kada zavrsimo sa pretragom imamo start, l i d, i treba da proverimo
+        //? da li je nasa tacka unutar tog trougla
+        return (pripadaTrouglu(start, levaTacka, desnaTacka, A));
+
+    }
+
 private:
 
 };
@@ -195,14 +233,13 @@ void stampajVektor(vector<double> a)
 int main()
 {
     Geometrija g = Geometrija();
+
+    vector<double> A = {0.5, 0.5};
+  
+    std::vector<pair<double, double>> poligon = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
     
-    vector<double> A = {0, 0};
-    vector<double> B = {0, 1};
-    vector<double> C = {1, 0};
-    vector<double> P = {-1, 0};
     
-    
-    if(g.pripadaTrouglu(A, B, C, P))
+    if(g.tackaUnutarKonveksnogPoligona(poligon, A))
     {
         cout << "Tacka pripada" << endl;
     }
