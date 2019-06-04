@@ -88,20 +88,81 @@ string manacher(const string &stariString, const string &dopunjenString)
     // pronalazimo najvecu duzinu palindroma i pamtimo njegov centar
     int maxDuzina = 0, maxCentar;
     for (int i = 1; i < dopunjenString.size() - 1; i++)
-    if (d[i] > maxDuzina)
-    {
-        maxDuzina = d[i];
-        maxCentar = i;
-    }
+        if (d[i] > maxDuzina)
+        {
+            maxDuzina = d[i];
+            maxCentar = i;
+        }
     int maxPocetak = (maxCentar - maxDuzina) / 2;
     return stariString.substr(maxPocetak, maxDuzina);
 
 }
+
+string boljiManacher(const string &stariString)
+{
+    string dopunjenString = dopuni(stariString);
+    vector<int> P(dopunjenString.size(), 0);
+
+    int C = 0;
+    int R = 0;
+
+    for(int i = 1; i < dopunjenString.size() - 1; i++)
+    {
+        // karakter koji je "preko puta" u odnosu na nas trenutni karakter u odnosu na centar
+        int sim = 2 * C - i;
+
+        // ako smo i dalje u granicama trenutnog opsega proveravamo da li imamo situaciju da 
+        // duzina palindroma u ondosu na centar sim ispada iz trenutnog opsega, ili je manja
+        // uzimamo minimum jer uvek zelimo da ostanemo u opsegu
+        if(i < R)
+        {
+            // ovo ce nam omoguciti da izbegnemo setanje redom da bi ponovo nasli gde je palindrom
+            // vec cemo samo nastaviti od dela koji sigurno znamo da pripada palindromu
+            P[i] = min(R - i, P[sim]);
+        }
+
+        // proveravamo da li mozemo da prosirimo palindrom, i radimo to koliko god mozemo
+        while(dopunjenString[i - (1 + P[i])] == dopunjenString[i + (1 + P[i])])
+        {
+            P[i]++;
+        }
+
+        // ako smo izleteli iz opsega, to znaci da moramo da pomerimo taman toliko da nam staje to dokle smo izleteli
+        if(i + P[i] > R)
+        {
+            C = i;
+            R = i + P[i];
+        }
+    }
+    
+    int maxDuzina = 0;
+    int maxC = 0;
+
+    for(int i = 1; i < dopunjenString.size() - 1; i++)
+    {
+        if(P[i] > maxDuzina)
+        {
+            maxDuzina = P[i];
+            maxC = i;
+        }
+    }
+
+    string palindrom;
+    for(int i = maxC - maxDuzina + 1; i <= 2 * maxDuzina; i+=2)
+        palindrom += dopunjenString.substr(i, 1);
+    
+    return palindrom;
+    // int maxPocetak = (maxC - maxDuzina) / 2;
+    // return stariString.substr(maxPocetak, maxDuzina);
+}
+
 int main()
 {
-    string s = "alabalacdwww";
+    string s = "ananabcana";
     string dopunjen = dopuni(s);
 
-    string najveciPalindrom = manacher(s, dopunjen);
+    // string najveciPalindrom = manacher(s, dopunjen);
+
+    string najveciPalindrom = boljiManacher(s);    
     cout << "najveci palindrom je: " << najveciPalindrom << endl;
 }
