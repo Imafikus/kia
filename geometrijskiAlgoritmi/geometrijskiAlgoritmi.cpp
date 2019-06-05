@@ -191,6 +191,25 @@ public:
 
     }
 
+    vector<double> nadjiSkrozLevuTacku(vector<pair<double, double>> skupTacaka)
+    {
+        pair<double, double> skrozLevo = skupTacaka[0];
+        
+        for(int i = 1; i < skupTacaka.size(); i++)
+        {
+            if(skupTacaka[i].first < skrozLevo.first)
+            {
+                skrozLevo = skupTacaka[i];
+            }
+            else
+            {
+                if(skupTacaka[i].first == skrozLevo.first && skupTacaka[i].second < skrozLevo.second)
+                skrozLevo = skupTacaka[i];
+            }
+        }
+        return {skrozLevo.first, skrozLevo.second};
+    }
+
 private:
 
 };
@@ -221,15 +240,17 @@ int main()
 
     vector<double> A = {0.5, 1.5};
   
-    std::vector<pair<double, double>> poligon = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
+    std::vector<pair<double, double>> poligon = { {1, 1}, {0, 0}, {0, -1}, {0, 1} };
     
+    cout << "Skroz leva tacka" << endl;
+    stampajVektor(g.nadjiSkrozLevuTacku(poligon));
     
-    if(g.tackaUnutarNekonveksnogPoligona(poligon, A))
-    {
-        cout << "Tacka pripada" << endl;
-    }
-    else
-    {
-        cout << "Tacka ne pripada" << endl;
-    }
+    // if(g.tackaUnutarNekonveksnogPoligona(poligon, A))
+    // {
+    //     cout << "Tacka pripada" << endl;
+    // }
+    // else
+    // {
+    //     cout << "Tacka ne pripada" << endl;
+    // }
 }
