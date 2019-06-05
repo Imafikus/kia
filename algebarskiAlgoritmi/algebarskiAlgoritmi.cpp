@@ -74,6 +74,7 @@ vector<int> rastaviNaProsteCinioceEratosten(int n)
 
 int nzdProsireni(int a, int b, int &x, int &y)
 {
+    //? vracamo neko d i nalazimo x i y tako da vazi d = a * x + b * y
     if(b == 0)
     {
         x = 1;
@@ -89,6 +90,15 @@ int nzdProsireni(int a, int b, int &x, int &y)
     y = x1 - (a / b) * y1;
 
     return nzd;
+}
+
+void stampajVektor(vector<int> v)
+{
+    for(int e : v)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
 }
 
 int main()
@@ -110,11 +120,3 @@ int main()
 
 }
 
-void stampajVektor(vector<int> v)
-{
-    for(int e : v)
-    {
-        cout << e << " ";
-    }
-    cout << endl;
-}
