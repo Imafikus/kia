@@ -191,25 +191,58 @@ public:
 
     }
 
-    vector<double> nadjiSkrozLevuTacku(vector<pair<double, double>> skupTacaka)
+    int nadjiSkrozLevuTacku(vector<pair<double, double>> skupTacaka)
     {
         pair<double, double> skrozLevo = skupTacaka[0];
+        int idx = 0;
         
         for(int i = 1; i < skupTacaka.size(); i++)
         {
-            if(skupTacaka[i].first < skrozLevo.first)
+            if(skupTacaka[i].first < skrozLevo.first || (skupTacaka[i].first == skrozLevo.first && skupTacaka[i].second < skrozLevo.second))
             {
                 skrozLevo = skupTacaka[i];
-            }
-            else
-            {
-                if(skupTacaka[i].first == skrozLevo.first && skupTacaka[i].second < skrozLevo.second)
-                skrozLevo = skupTacaka[i];
+                idx = i;
             }
         }
-        return {skrozLevo.first, skrozLevo.second};
+        return idx;
     }
 
+    vector<pair<double, double>> convexHullGift(vector<pair<double, double>> skupTacaka)
+    {
+        int brojTacaka = skupTacaka.size();
+        
+        if(brojTacaka < 3)
+            return {};
+        vector<pair<double, double>> poligon;
+        
+        int skrozLevo = nadjiSkrozLevuTacku(skupTacaka);
+        int tekuca = skrozLevo;
+        do
+        {
+            poligon.push_back(skupTacaka[tekuca]);
+
+            int naredna = (tekuca + 1) % brojTacaka;
+
+            for(int i = 0; i < brojTacaka; i++)
+            {
+                vector<double> A = {skupTacaka[tekuca].first, skupTacaka[tekuca].second};
+                vector<double> B = {skupTacaka[naredna].first, skupTacaka[naredna].second};
+                vector<double> P = {skupTacaka[i].first, skupTacaka[i].second};
+
+                //? Imamo trenutnu duz AB za koju proveravamo da li je unutar poligona
+                //? To radimo tako sto idemo redom i gledamo da li su sve ostale tacke sa desne strane duzi AB, ako jesu, to znaci
+                //? da je svim trouglovima koje mozemo da napravimo orijentacija pozivitna, pa samo proveramo da li postoji
+                //? neki trougao za koji to ne vazi, ako postoji, proveravamo sledecu tacku
+                if(orijentacija(A, B, P) < 0)
+                {
+                    naredna = i;
+                }
+            }
+                tekuca = naredna;
+        } while (tekuca != skrozLevo);
+    
+    return poligon;
+    }
 private:
 
 };
@@ -233,24 +266,22 @@ void stampajVektor(vector<double> a)
     cout << endl;
 }
 
+void stampajTacke(vector<pair<double, double>> skupTacaka)
+{
+    for(pair<double, double> tacka : skupTacaka)
+    {
+        cout << tacka.first << " " << tacka.second << endl;
+    }
+}
 
 int main()
 {
     Geometrija g = Geometrija();
 
     vector<double> A = {0.5, 1.5};
-  
-    std::vector<pair<double, double>> poligon = { {1, 1}, {0, 0}, {0, -1}, {0, 1} };
-    
-    cout << "Skroz leva tacka" << endl;
-    stampajVektor(g.nadjiSkrozLevuTacku(poligon));
-    
-    // if(g.tackaUnutarNekonveksnogPoligona(poligon, A))
-    // {
-    //     cout << "Tacka pripada" << endl;
-    // }
-    // else
-    // {
-    //     cout << "Tacka ne pripada" << endl;
-    // }
+
+    std::vector<pair<double, double>> poligon = { {1, 1}, {0, 0}, {1, 0}, {0, 1}, {0.2, 0.2}, {0.7, 0.7} };
+
+    stampajTacke(g.convexHullGift(poligon));
+
 }
