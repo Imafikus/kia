@@ -242,22 +242,17 @@ public:
 
             for(int i = 0; i < brojTacaka; i++)
             {
-                vector<double> A = {skupTacaka[tekuca].first, skupTacaka[tekuca].second};
-                vector<double> B = {skupTacaka[naredna].first, skupTacaka[naredna].second};
-                vector<double> P = {skupTacaka[i].first, skupTacaka[i].second};
-
                 //? Imamo trenutnu duz AB za koju proveravamo da li je unutar poligona
                 //? To radimo tako sto idemo redom i gledamo da li su sve ostale tacke sa desne strane duzi AB, ako jesu, to znaci
                 //? da je svim trouglovima koje mozemo da napravimo orijentacija pozivitna, pa samo proveramo da li postoji
                 //? neki trougao za koji to ne vazi, ako postoji, proveravamo sledecu tacku
-                if(orijentacija(A, B, P) < 0)
+                if(orijentacija(skupTacaka[tekuca], skupTacaka[naredna], skupTacaka[i]) < 0)
                 {
                     naredna = i;
                 }
             }
                 tekuca = naredna;
         } while (tekuca != skrozLevo);
-    
         return poligon;
     }
 

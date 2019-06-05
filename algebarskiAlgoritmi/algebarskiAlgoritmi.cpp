@@ -72,6 +72,24 @@ vector<int> rastaviNaProsteCinioceEratosten(int n)
     return prostiCinioci;
 }
 
+int nzdProsireni(int a, int b, int &x, int &y)
+{
+    if(b == 0)
+    {
+        x = 1;
+        y = 0;
+        return a;
+    }
+
+    int x1, y1;
+
+    int nzd = nzdProsireni(b, a%b, x1, y1);
+
+    x = y1;
+    y = x1 - (a / b) * y1;
+
+    return nzd;
+}
 
 int main()
 {
@@ -80,6 +98,16 @@ int main()
 
     vector<int> prostiCinioci2 = rastaviNaProsteCinioceEratosten(140);
     stampajVektor(prostiCinioci2);
+
+    int a = 30;
+    int b = 12;
+
+    int x;
+    int y;
+
+    int d = nzdProsireni(a, b, x, y);
+    cout << d << " = "<< x << " * "<< a << " + " << y << " * " << b << endl;;
+
 }
 
 void stampajVektor(vector<int> v)
