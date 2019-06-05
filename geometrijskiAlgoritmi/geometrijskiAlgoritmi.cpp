@@ -136,29 +136,14 @@ public:
             //? proveravamo da li je A izmedju M1 i M2 u odnosu na X osu
             bool izmedjuTacaka = (A[0] > min(M1[0], M2[0]) && A[0] < max(M1[0], M2[0]));
             
-            // cout << "izmedjuTacaka: " << izmedjuTacaka << endl;
-            // cout << "Tacke: " << M1[0] << " " << M1[1] << "   " << M2[0] << " " << M2[1] << endl;
-            // cout << endl;
-            //? Ovo je tacka koja je na istoj X kkordinati kao A, ali je sigurno ispod M1 i M2
-            if(izmedjuTacaka && A[1] > max(M1[1], M2[1]))
+            //? Kako gledamo polupravu koja ide na dole, interesuju nas samo tacke poligona koje su sigurno na istoj ili manjoj visini od A
+            //? Ako imamo tacku koja je iznad M1 i M2 po Y i koja je izmedju njih po X onda ona sigurno sece duz M1M2
+            if(izmedjuTacaka && A[1] >= max(M1[1], M2[1]))
             {
-                //? uzimamo A1 tako da ima X koordinatu kao A, a da joj Y koordinata sigurno bude manja od manje koordinate M1 i M2
-                vector<double> A1 = {A[0], min(M1[1], M2[1]) - 1};
-                // cout << "A1: " << A1[0] << " " << A1[1] << endl;
-                
-                double orM1 = orijentacija(A, A1, M1);
-                double orM2 = orijentacija(A, A1, M2);
-            
-                // cout << "orM1: " << orM1 << endl;
-                // cout << "orM2: " << orM2 << endl; 
-                // cout << endl;
-
-                //? ako ovo vazi znamo da su tacke sa razlicitih strana duzi koja ce, te ovo znaci da imamo presek sa tom duzi
-                if(orM1 != orM2)
-                    brojPreseka++;
+                brojPreseka++;
             }
         }
-        // cout << "Broj preseka: " << brojPreseka << endl;
+        cout << "Broj preseka: " << brojPreseka << endl;
         if(brojPreseka % 2 == 0)
         {
             return false;
@@ -234,12 +219,12 @@ int main()
 {
     Geometrija g = Geometrija();
 
-    vector<double> A = {0.5, 0.5};
+    vector<double> A = {0.5, 1.5};
   
     std::vector<pair<double, double>> poligon = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
     
     
-    if(g.tackaUnutarKonveksnogPoligona(poligon, A))
+    if(g.tackaUnutarNekonveksnogPoligona(poligon, A))
     {
         cout << "Tacka pripada" << endl;
     }
