@@ -2,6 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include <stack>
 
 using namespace std;
 
@@ -32,6 +33,12 @@ public:
     double ugaoIzmedju(vector<double> a, vector<double> b)
     {
         return acos(skalarniProizvod(a, b) / (intenzitet(a) * intenzitet(b)) );
+    }
+
+    double kvadratRastojanjaIzmedju(pair<double, double> A, pair<double, double> B)
+    {
+        double d = (A.first - B.first) * (A.first - B.first) - (A.second - B.second) * (A.second - B.second);
+        return d;
     }
 
     vector<double> vektorskiProizvod3d(vector<double> a, vector<double> b)
@@ -115,6 +122,16 @@ public:
         double ax = A[0]; double ay = A[1];
         double bx = B[0]; double by = B[1];
         double cx = C[0]; double cy = C[1];
+
+        double d = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+        return d;
+    }
+
+    double orijentacija(pair<double, double> A, pair<double, double> B, pair<double, double> C)
+    {
+        double ax = A.first; double ay = A.second;
+        double bx = B.first; double by = B.second;
+        double cx = C.first; double cy = C.second;
 
         double d = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
         return d;
@@ -241,10 +258,79 @@ public:
                 tekuca = naredna;
         } while (tekuca != skrozLevo);
     
-    return poligon;
+        return poligon;
     }
-private:
 
+    vector<pair<double, double>> convexHullGraham(vector<pair<double, double>> skupTacaka)
+    {
+        int n = skupTacaka.size();
+        if(n < 3)
+            return {};
+        
+        int skrozLevo = nadjiSkrozLevuTacku(skupTacaka);
+        swap(skupTacaka[0], skupTacaka[skrozLevo]);
+
+        p0 = skupTacaka[0];
+
+        sort(skupTacaka.begin() + 1, skupTacaka.end(), [=](pair<double, double> a, pair<double, double> b){
+            return cmp(a, b);
+        });
+        stack<pair<double, double>> poligon;
+
+        poligon.push(skupTacaka[0]);
+        poligon.push(skupTacaka[1]);
+        poligon.push(skupTacaka[2]);
+
+        for(int i = 3; i < n; i++)
+        {
+            while(orijentacija(drugiSaVrhaSteka(poligon), poligon.top(), skupTacaka[i]) <= 0)
+            {
+                poligon.pop();
+            }
+            poligon.push(skupTacaka[i]);
+        }
+
+        vector<pair<double, double>> res;
+        while(!poligon.empty())
+        {
+            res.push_back(poligon.top());
+            poligon.pop();
+        }
+        return res;
+    }
+
+private:
+    pair<double, double> drugiSaVrhaSteka(stack<pair<double, double>> stekTacaka)
+    {
+        pair<double, double> prvi = stekTacaka.top();
+        stekTacaka.pop();
+
+        pair<double, double> drugi = stekTacaka.top();
+        stekTacaka.push(prvi);
+
+        return drugi;
+    }
+
+    bool cmp(pair<double, double> p1, pair<double, double> p2)
+    {
+        double ori = orijentacija(p0, p1, p2);
+        
+        if(ori < 0)
+        {
+            return false;
+        }
+        else if (ori > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return (kvadratRastojanjaIzmedju(p0, p1) <= kvadratRastojanjaIzmedju(p0, p2));
+        }
+    }
+
+    //? sluzi za sortiranje
+    pair<double, double> p0;
 };
 
 
@@ -283,5 +369,7 @@ int main()
     std::vector<pair<double, double>> poligon = { {1, 1}, {0, 0}, {1, 0}, {0, 1}, {0.2, 0.2}, {0.7, 0.7} };
 
     stampajTacke(g.convexHullGift(poligon));
+    cout << "Testeroni" << endl;
+    stampajTacke(g.convexHullGraham(poligon));
 
 }
