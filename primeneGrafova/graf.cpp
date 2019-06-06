@@ -81,7 +81,12 @@ public:
                     tztrMatrica[i][j] = true;
                 else 
                     tztrMatrica[i][j] = false;
-            }    
+            }
+        
+        rezidualniGraf.resize(brojCvorova);
+        for(int i = 0; i < brojCvorova; i++)
+            rezidualniGraf[i].resize(brojCvorova);
+
     }
 
     void dfs(int cvor, bool dozvoljenoPisanje = true)
@@ -226,6 +231,7 @@ public:
         }
     }
 
+    //! Moze da vrati isti element vise puta, koristiti set
     void nadjiArtTacke(int cvor)
     {
         jePosecen[cvor] = true;
@@ -238,24 +244,27 @@ public:
 
         for(int sused : listaPovezanosti[cvor])
         {
-            if(sused == roditeljCvora[cvor]) continue;
-
-            roditeljCvora[sused] = cvor;
-            decaCvora++;
-            
             if(!jePosecen[sused])
+            {
+                roditeljCvora[sused] = cvor;
+                decaCvora++;
+                
                 nadjiArtTacke(sused);
             
-            lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
-
-            //? pocetni cvor
-            if(roditeljCvora[cvor] == -1 && decaCvora > 1)
-                cout << cvor << " ";
-            //? Ili je most ili je ciklus
-            if(roditeljCvora[cvor] != -1 && ids[cvor] <= lowLink[sused])
-                cout << cvor << " ";
-            else
                 lowLink[cvor] = min(lowLink[cvor], lowLink[sused]);
+
+                //? pocetni cvor
+                if(roditeljCvora[cvor] == -1 && decaCvora > 1)
+                    cout << cvor << " ";
+            
+                //? Ili je most ili je ciklus
+                if(roditeljCvora[cvor] != -1 && ids[cvor] <= lowLink[sused])
+                    cout << cvor << " ";
+            }
+            else if(roditeljCvora[cvor] != sused)
+            {
+                lowLink[cvor] = min(lowLink[cvor], ids[sused]);
+            }
         }
         cout << endl;
     }
@@ -674,6 +683,119 @@ public:
         }
         cout << endl;
     }
+    bool edmondKarpBfs(int izvor, int ponor)
+    {
+        queue<int> red;
+        red.push(izvor);
+
+        while(!red.empty())
+        {
+            cout << "usao u while" << endl;
+            int cvor = red.front();
+            red.pop();
+
+            for(pair<int, int> sused : listaSaTezinama[cvor])
+            {
+                if(!jePosecen[sused.first] && rezidualniGraf[cvor][sused.first] > 0)
+                {
+                    red.push(sused.first);
+                    roditeljCvora[sused.first] = cvor;
+                    jePosecen[sused.first] = true;
+                }
+            }
+        }
+        return(jePosecen[ponor] == true);
+    }
+    void testiranje(int izvor, int ponor)
+    {
+        queue<int> red;
+        red.push(izvor);
+
+        while(!red.empty())
+        {
+            cout << "usao u while" << endl;
+            int cvor = red.front();
+            red.pop();
+
+            for(pair<int, int> sused : listaSaTezinama[cvor])
+            {
+                if(!jePosecen[sused.first])
+                {
+                    red.push(sused.first);
+                    roditeljCvora[sused.first] = cvor;
+                    jePosecen[sused.first] = true;
+                }
+            }
+        }
+        if(jePosecen[ponor])
+            cout << "POSECEN" << endl;
+        else
+            cout << "NEPOSECEN" << endl;
+
+        return;
+        for(int cvor = ponor; cvor != izvor; cvor = roditeljCvora[cvor])
+            cout << cvor << " ";
+        cout << izvor;
+        cout << endl;
+    }
+    void edmondKarp(int izvor, int ponor)
+    {
+        //? izjednacavamo rezidualni graf i matricu susedstva pravog grafa
+        for(int cvor = 0; cvor < brojCvorova; cvor++)
+        {
+            for(pair<int, int> sused : listaSaTezinama[cvor])
+            {
+                rezidualniGraf[cvor][sused.first] = sused.second;
+            }
+        }
+
+        cout << "Polazni rezidualni graf je: " << endl;
+        for(int i=0; i<brojCvorova; i++)
+        {
+            for(int j=0; j<brojCvorova; j++)
+                cout << rezidualniGraf[i][j] << " ";
+            cout << endl;
+        }
+
+        int maxTok = 0;
+        bool postojiPut = true;
+        while(postojiPut)
+        {
+            postojiPut = edmondKarpBfs(izvor, ponor);
+            cout << "Usao u while" << endl;
+
+            //? Trazimo bottleneck
+            int tok = numeric_limits<int>::max();
+            for(int cvor = ponor; cvor != izvor; cvor = roditeljCvora[cvor])
+            {
+                int u = roditeljCvora[cvor];
+                if(rezidualniGraf[u][cvor] < tok)
+                {
+                    tok = rezidualniGraf[u][cvor];
+                }
+            }
+
+            //? azuriramo kapacitete rezidualnog grafa
+            for(int cvor = ponor; cvor != izvor; cvor = roditeljCvora[cvor])
+            {
+                int u = roditeljCvora[cvor];
+                rezidualniGraf[u][cvor] -= tok;
+                rezidualniGraf[cvor][u] += tok;
+            }
+
+            cout << "Rezidualni graf sada: " << endl;
+            for(int i=0; i<brojCvorova; i++)
+            {
+                for(int j=0; j<brojCvorova; j++)
+                    cout << rezidualniGraf[i][j] << " ";
+                cout << endl;
+            }
+
+            maxTok += tok;
+        }
+
+        cout << "Optimalni tok ima vrednost: " << maxTok << endl;
+    }   
 
     //? Osnovne inicijalizacije
     int brojCvorova;
@@ -699,7 +821,7 @@ public:
     vector<bool> uSteku;
     stack<int> slcStack;
 
-    //? Dijkstra, Prim, Belman-Ford
+    //? Dijkstra, Prim, Belman-Ford, Edmond-Karp
     vector<vector<pair<int, int>> > listaSaTezinama;
     vector<int> udaljenost;
     vector<bool> postojiPutDoCvora;
@@ -710,6 +832,9 @@ public:
 
     //?Flojd Varsal
     vector<vector<int>> fwMatrica;
+
+    //? Edmond-Karp
+    vector<vector<int>> rezidualniGraf;
 
     //? Tranzitivno zatvorenje, tranzitivna redukcija
     vector<vector<bool>> tztrMatrica;
@@ -793,13 +918,39 @@ public:
 
 int main()
 {
-    Graf g(4);
+    Graf g(7);
 
     g.dodajGranuNeusmeren(0, 1);
-    g.dodajGranuNeusmeren(1, 2);
-    g.dodajGranuNeusmeren(2, 3);
-    g.dodajGranuNeusmeren(3, 0);
-    g.nadjiOjlerovCiklusFleri();
+    g.dodajGranuNeusmeren(0, 3);
+    g.dodajGranuNeusmeren(0, 4);
 
+    g.dodajGranuNeusmeren(2, 1);
+    
+    g.dodajGranuNeusmeren(6, 3);
+
+    g.dodajGranuNeusmeren(4, 5);
+
+    g.nadjiArtTacke(0);
+
+    // g.dodajGranuSaTezinom(0, 1, 5);
+    // g.dodajGranuSaTezinom(0, 2, 7);
+    // g.dodajGranuSaTezinom(0, 3, 6);
+
+    // g.dodajGranuSaTezinom(1, 4, 4);
+    // g.dodajGranuSaTezinom(1, 5, 3);
+
+    // g.dodajGranuSaTezinom(2, 5, 4);
+    // g.dodajGranuSaTezinom(2, 6, 1);
+
+    // g.dodajGranuSaTezinom(3, 6, 5);
+
+    // g.dodajGranuSaTezinom(4, 7, 3);
+
+    // g.dodajGranuSaTezinom(5, 7, 7);
+
+    // g.dodajGranuSaTezinom(6, 5, 4);
+    // g.dodajGranuSaTezinom(6, 7, 6);
+
+    // g.edmondKarp(0, 7);
 
 }
