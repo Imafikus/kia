@@ -53,7 +53,6 @@ void stampajSet(set<T> v)
         cout << *it << " ";
     cout << endl;
 }
-./
 int main()
 {
     vector<vector<int>> listaPovezanosti = {{1, 3, 4}, {0, 2}, {1}, {0, 6}, {0, 5}, {4}, {3}};
