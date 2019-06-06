@@ -63,6 +63,7 @@ int main()
         {{1, 1}, {3, 3}},
         {{0, 4}, {2, 3}}
     };
+
     udaljenost.resize(listaSuseda.size(), 100000);
     postojiPut.resize(listaSuseda.size(), false);
     roditelj.resize(listaSuseda.size(), -1);
