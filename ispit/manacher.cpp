@@ -6,68 +6,72 @@ using namespace std;
 
 string dopuniString(string text)
 {
-    string dopunjen = "^";
+    string dop = "ˆ";
     for(int i = 0; i < text.size(); i++)
     {
-        dopunjen += "|" + text.substr(i, 1);
+        dop += "|" + text.substr(i, 1);
     }
-    dopunjen += "|$";
-
-    return dopunjen;
+    dop += "|$";
+    return dop;
 }
-
 string manacher(string text)
 {
-    string dopunjen = dopuniString(text);
+    string dop = dopuniString(text);
+    cout << dop << endl;
+    
+    vector<int> P(dop.size());
 
-    cout << "dopuniString: " << dopunjen << endl;
-    int R = 0;
     int C = 0;
+    int R = 0;
 
-    vector<int> P(dopunjen.size(), 0);
+    P[0] = 0;
 
-    for(int i = 1; i < dopunjen.size() - 1; i++)
+    for(int i = 1; i < dop.size() - 1; i++)
     {
         int sim = 2 * C - i;
         if(i < R)
         {
-            P[i] = min(R - i, P[sim]);
+            P[i] = P[sim];
         }
-
-        while(dopunjen[i - (1 + P[i])] == dopunjen[i + (1 + P[i])])
+        else
+        {
+            if(i > R)
+            {
+                P[i] = 0;
+            }
+            else
+            {
+                P[i] = R - i;
+            }
+        } 
+        while(dop[i - (P[i] + 1)] == dop[i + (P[i] + 1)])
         {
             P[i]++;
         }
-
-        if(i + P[i] > R)
+        if(P[i] + i > R)
         {
+            R = P[i] + i;
             C = i;
-            R = i + P[i];
         }
     }
-
+    int maxCentar;
     int maxDuzina = 0;
-    int maxCentar = 0;
 
-    for(int i = 1; i < dopunjen.size() - 1; i++)
+    for(int i = 1; i < dop.size() - 1; i++)
     {
         if(P[i] > maxDuzina)
         {
-            maxCentar = i;
             maxDuzina = P[i];
+            maxCentar = i;
         }
     }
 
-    string palindrom;
-    for(int i = maxCentar - maxDuzina + 1; i <= 2 * maxDuzina; i += 2)
-    {
-        palindrom += dopunjen.substr(i, 1);
-    }
-    return palindrom;
+    int pocetak = abs(maxCentar - maxDuzina) / 2 - 1;
+    return text.substr(pocetak, maxDuzina);
 }
 
 int main()
 {
-    string s = "ananabccaana";
-    cout << manacher(s) << endl; 
+    string s = "anavolimennennenne";
+    cout << manacher(s) << endl;    
 }
