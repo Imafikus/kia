@@ -36,7 +36,7 @@ void nadjiArtikulacioneTacke(int cvor, vector<vector<int>> listaPovezanosti)
             if(roditelj[cvor] == -1 && decaCvora > 1)
                 artikulacioneTacke.insert(cvor);
 
-            if(roditelj[cvor] != -1 && lowLink[sused] >= ids[cvor])
+            if(roditelj[cvor] != -1 && ids[cvor] <= lowLink[sused])
                 artikulacioneTacke.insert(cvor);
         }
         else if(sused != roditelj[cvor])
